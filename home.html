@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 500px;
+            height: 500px;
+        }
+
+        td {
+            width: 20px;
+            height: 20px;
+        }
+
+        .white {
+            background-color: white;
+            border: 1px solid black;
+        }
+
+        .black {
+            background-color: black;
+            border: 1px solid black;
+        }
+    </style>
+</head>
+
+<body>
+    <h3>Graph</h3>
+    <table>
+        <tbody>
+
+        </tbody>
+    </table>
+    <script>
+        const tbodyElement = document.querySelector('tbody');
+        let numericArray;
+        async function fetchData() {
+            let response = await fetch('http://localhost:8000/test');
+            let resObj = await response.json();
+            numericArray = resObj.map(row => row.map(value => value ? 1 : 0));
+            numericArray.forEach(row => {
+            let tableRow = document.createElement('tr');
+            row.forEach(cellValue => {
+                let tableCell = document.createElement('td');
+                tableCell.className = cellValue === 1 ? 'black' : 'white';
+                tableRow.appendChild(tableCell);    
+            });
+
+            tbodyElement.appendChild(tableRow);
+        });
+        }
+        fetchData();
+    </script>
+</body>
+
+</html>
