@@ -30,11 +30,18 @@ public class Graph{
     } 
                     //   0        0       1        2
     boolean isValid(float i1,float j1,float i2,float j2){
+
+
+        if(i1<0 || i2<0 || j1<0 || j2<0){
+            return false;
+        }
+
        // System.out.println("just test" + graph[(int)i1][(int)j1] );
         if(graph[(int)i1][(int)j1] || graph[(int)i2][(int)j2]){
             System.out.print("false ");
             return false;
         }
+
 
         
         float dx = i2-i1; 
