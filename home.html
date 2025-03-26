@@ -42,6 +42,7 @@
         async function fetchData() {
             let response = await fetch('http://localhost:8000/test');
             let resObj = await response.json();
+            console.log(resObj);
             numericArray = resObj.map(row => row.map(value => value ? 1 : 0));
             numericArray.forEach(row => {
             let tableRow = document.createElement('tr');
