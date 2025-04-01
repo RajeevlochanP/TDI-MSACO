@@ -28,16 +28,7 @@ public class Server {
             }
 
             // Generate JSON response
-            Graph graph=new Graph(20);
-            boolean[][] data =graph.graph;
-            graph.isValid(0,0,2,1);
-            graph.isValid(1,0,2,1);
-            graph.isValid(3,2,2,1);
-            graph.isValid(2,1,4,0);
-            graph.isValid(1,2,1,1);
-            graph.isValid(19,19,0,0);
-            graph.isValid(0,0,3,7);
-            // graph.isValid(19, 0, 0, 19);
+            boolean[][] data =Main.test();
             System.out.println();
             StringBuilder jsonResponse = new StringBuilder("[");
             for (int i = 0; i < data.length; i++) {
