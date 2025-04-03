@@ -3,10 +3,13 @@ class Graph{
     boolean[][] graph;
     double[][] tdiValues;
     int size;
-    public Graph(int size){
+    int alpha,beta;
+    public Graph(int size,int alpha,int beta){
         generateGraph(size);
         restartTdiValues();
         this.size=size;
+        this.alpha=alpha;
+        this.beta=beta;
     }
     private void generateGraph(int size){
         this.graph=new boolean[size][size];
@@ -46,10 +49,12 @@ class Ant {
     ArrayList<Position> path;
     double pathCost;
     Graph grid;
-    public Ant(Graph grid){
+    int stepSize;
+    public Ant(Graph grid,int stepSize){
         this.grid = grid;
         this.path=new ArrayList<Position>();
-        pathCost=0;
+        this.pathCost=0;
+        this.stepSize=stepSize;
     }
     boolean isAllowed(Position p1, Position p2) {
         double i1 = p1.row, j1 = p1.col, i2 = p2.row, j2 = p2.col;
@@ -96,9 +101,52 @@ class Ant {
         System.out.print("true ");
         return true;
     }
+    
+
     private Position nextPosition(Position currPosition){
-        //Ali need to implement this
-        return null;
+        //Ali needs to implement this
+        int row=currPosition.row;
+        int col=currPosition.col;
+        Position target=new Position(this.grid.size-1, this.grid.size-1);
+        List<Position> allowed=new ArrayList<>();
+        for(int i=row-this.stepSize;i<=row+this.stepSize;i++) {
+            for(int j=col-this.stepSize;j<=col+this.stepSize;j++) {
+                Position p=new Position(i, j);
+                if(isAllowed(currPosition, p)) {
+                    allowed.add(p);
+                }
+            }
+        }
+        double[] probability=new double[allowed.size()];
+        int indx=0;
+        double sum=0;
+        for(Position p:allowed) {
+            int i=p.row;
+            int j=p.col;
+            probability[indx]=(Math.pow(this.grid.distance(p, target), this.grid.alpha)+Math.pow(this.grid.tdiValues[i][j], this.grid.beta));
+            sum+=probability[indx++];
+        }
+        for(int i=0;i<probability.length;i++) {
+            probability[i]=probability[i]/sum;
+        }
+
+        double[] cummulativeProb=new double[allowed.size()];
+        cummulativeProb[0]=probability[0];
+        for(int i=1;i<probability.length;i++) {
+            cummulativeProb[i]=cummulativeProb[i-1]+probability[i];
+        }
+
+        double rand=Math.random();
+        if(rand<cummulativeProb[0]) {
+            return allowed.get(0);
+        }
+
+        for(int i=0;i<cummulativeProb.length-1;i++) {
+            if(rand>=cummulativeProb[i] && rand<cummulativeProb[i+1]) {
+                return allowed.get(i+1);
+            }
+        }
+        return allowed.getLast();
     }
     void findSolution(){
         Position goalPosition=new Position(grid.size-1,grid.size-1);
@@ -146,7 +194,7 @@ public class Main {
         // }
     }
     public static boolean[][] test(){
-        Ant testAnt=new Ant(new Graph(20));
+        Ant testAnt=new Ant(new Graph(20,1,7),2);
         testAnt.isAllowed(new Position(0, 0),new Position(1,3));
         testAnt.isAllowed(new Position(1,0),new Position(2,1));
         testAnt.isAllowed(new Position(3,2),new Position(2,1));
