@@ -16,7 +16,7 @@ class Graph{
         this.size=size;
         for(int i=0;i<size;i++){
             for(int j=0;j<size;j++){
-                this.graph[i][j]= (i!=j) && (Math.random()<0.0);
+                this.graph[i][j]= (i!=j) && (Math.random()<0.2);
             }
         }
     }
@@ -67,57 +67,16 @@ class Ant {
     ArrayList<Position> path;
     double pathCost;
     Graph grid;
-    public Ant(Graph grid){
+    int stepSize;
+    int alpha,beta;
+    public Ant(Graph grid,int stepSize,int alpha,int beta){
         this.grid = grid;
         this.path=new ArrayList<Position>();
         this.pathCost=0;
+        this.stepSize=stepSize;
+        this.alpha=alpha;
+        this.beta=beta;
     }
-    /*
-    boolean isAllowed(Position p1, Position p2) {
-        double i1 = p1.row, j1 = p1.col, i2 = p2.row, j2 = p2.col;
-        if (i1 < 0 || i2 < 0 || j1 < 0 || j2 < 0) {
-            return false;
-        }
-        // System.out.println("just test" + grid.graph[(int)i1][(int)j1] );
-        if (grid.graph[(int) i1][(int) j1] || grid.graph[(int) i2][(int) j2]) {
-            System.out.print("false ");
-            return false;
-        }
-        double dx = i2 - i1;
-        double dy = j2 - j1;
-        int steps = (int) Math.max(Math.abs(dx), Math.abs(dy))*1000;
-        double xinc = (double) dx / steps;
-        double yinc = (double) dy / steps;
-        for (int k = 0; k < steps; k++) {
-            i1 += xinc;
-            j1 += yinc;
-            int i = (int) i1;
-            int j = (int) j1;
-            System.out.println(i1+" "+j1);
-            // System.out.print("(" + i + "," + j + ") ");
-            // if (grid.graph[i][j]) {
-            //     System.out.print("false ");
-            //     return false;
-            // }
-            // if ((i + 1 < grid.graph.length && Math.ceil(i1) != i1)) {
-            //     System.out.print("(" + (i + 1) + "," + j + ") ");
-            // }
-            // if ((j + 1 < grid.graph[0].length && Math.ceil(j1) != j1)) {
-            //     System.out.print("(" + i + "," + (j + 1) + ") ");
-            // }
-            if (i + 1 < grid.graph.length && Math.ceil(i1) != i1 && grid.graph[i][j]) {
-    
-                System.out.print("false ");
-                return false;
-            }
-            // if (j + 1 < grid.graph[0].length && Math.ceil(j1) != j1 && grid.graph[i][j + 1]) {
-            //     System.out.print("false ");
-            //     return false;
-            // }
-        }
-        System.out.print("true ");
-        return true;
-    }*/
     boolean isAllowed(Position p1, Position p2) {
         double i1 = p1.row+0.5, j1 = p1.col+0.5, i2 = p2.row+0.5, j2 = p2.col+0.5;
     
@@ -156,19 +115,11 @@ class Ant {
                 j = (int) Math.floor(j1);
             }
             // Ignore checking boundaries (i, j) exactly
-            // System.out.println(Math.abs(i1 - i));
             if ( Math.abs(i1 - i)< 1e-9 || Math.abs(j1 - j)< 1e-9) {
-                // System.out.println("boundary");
                 continue;
             }
     
-            // Ensure valid index
-            // if (i < 0 || i >= grid.graph.length || j < 0 || j >= grid.graph[0].length) {
-            //     return false;
-            // }
-    
             // If the point is **inside** an obstacle, return false
-            System.out.println("("+i+","+j+")");
             if (grid.graph[i][j]) {
                 return false;
             }
@@ -178,8 +129,50 @@ class Ant {
     }
     
     private Position nextPosition(Position currPosition){
-        //Ali need to implement this
-        return null;
+        //Ali needs to implement this
+        int row=currPosition.row;
+        int col=currPosition.col;
+        Position target=new Position(this.grid.size-1, this.grid.size-1);
+        List<Position> allowed=new ArrayList<>();
+        for(int i=row-this.stepSize;i<=row+this.stepSize;i++) {
+            for(int j=col-this.stepSize;j<=col+this.stepSize;j++) {
+                if(i==row && j==col){
+                    continue;
+                }
+                Position p=new Position(i, j);
+                if(isAllowed(currPosition, p)) {
+                    allowed.add(p);
+                }
+            }
+        }
+        double[] probability=new double[allowed.size()];
+        int indx=-1;
+        double sum=0;
+        for(Position p:allowed) {
+            int i=p.row;
+            int j=p.col;
+            probability[++indx]=(Math.pow((1.0/this.grid.distance(p, target)), this.alpha)+Math.pow((1.0/this.grid.tdiValues[i][j]), this.beta));
+            sum+=probability[indx];
+        }
+        for(int i=0;i<probability.length;i++) {
+            probability[i]=probability[i]/sum;
+        }
+
+        for(int i=1;i<probability.length;i++) {
+            probability[i]=probability[i-1]+probability[i];
+        }
+
+        double rand=Math.random();
+        if(rand<probability[0]) {
+            return allowed.get(0);
+        }
+
+        for(int i=0;i<probability.length-1;i++) {
+            if(rand>=probability[i] && rand<probability[i+1]) {
+                return allowed.get(i+1);
+            }
+        }
+        return allowed.getLast();
     }
     void findSolution(){
         Position goalPosition=new Position(grid.size-1,grid.size-1);
@@ -197,36 +190,35 @@ class Ant {
 }
 public class Main {
     public static void main(String[] args) {
-        Graph grid= new Graph(5);
-        Ant testAnt=new Ant(grid);
-        System.out.println(testAnt.isAllowed(new Position(0, 0),new Position(1, 4)));
-
-        // //initialisation
-        // int noOfAnts=50,noOfIterations=100,stepSize=2;
-        // float alpha=1,beta=7;
-        // Graph grid=new Graph(20);
-        // Ant[] ants=new Ant[noOfAnts];
-        // ArrayList<Position> solution=new ArrayList<>();
-        // for(int i=0;i<noOfAnts;i++){
-        //     ants[i]=new Ant(grid);
-        // }
-        // //main logic
-        // for(int i=0;i<noOfIterations;i++){
-        //     for(int j=0;j<noOfAnts;j++){
-        //         ants[j].findSolution();
-        //     }
-        //     for(int j=0;j<noOfAnts;j++){
-        //         grid.updateTdiValues(ants[j].path);
-        //     }
-        //     for(int j=0;j<noOfAnts;j++){
-        //         ants[j].restartPath();
-        //     }
-        // }
-        // Position goalPosition=new Position(grid.size-1,grid.size-1);
-        // solution.addLast(new Position(0, 0));
-        // while(!solution.getLast().equals(goalPosition)) {
-        //     solution.addLast(grid.index_data[solution.getLast().row][solution.getLast().col]);
-        // }
+        //initialisation
+        int noOfAnts=1,noOfIterations=1000,stepSize=2;
+        int alpha=1,beta=7;
+        Graph grid=new Graph(10);
+        Ant[] ants=new Ant[noOfAnts];
+        ArrayList<Position> solution=new ArrayList<>();
+        for(int i=0;i<noOfAnts;i++){
+            ants[i]=new Ant(grid,stepSize,alpha,beta);
+        }
+        //main logic
+        for(int i=0;i<noOfIterations;i++){
+            for(int j=0;j<noOfAnts;j++){
+                ants[j].findSolution();
+                System.out.print(ants[j].path.size()+" ");
+            }
+            for(int j=0;j<noOfAnts;j++){
+                grid.updateTdiValues(ants[j].path);
+            }
+            for(int j=0;j<noOfAnts;j++){
+                ants[j].restartPath();
+            }
+        }
+        Position goalPosition=new Position(grid.size-1,grid.size-1);
+        solution.addLast(new Position(0, 0));
+        while(!solution.getLast().equals(goalPosition)) {
+            solution.addLast(grid.index_data[solution.getLast().row][solution.getLast().col]);
+        }
+        System.out.println("solution :"+solution.size());
+        System.out.println(solution);
     }
     // public static boolean[][] test(){
     //     Ant testAnt=new Ant(new Graph(20));
