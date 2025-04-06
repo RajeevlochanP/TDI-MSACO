@@ -57,7 +57,7 @@ class Graph{
     static double distance(Position p1,Position p2){
         return Math.sqrt((p1.row-p2.row)*(p1.row-p2.row)+(p1.col-p2.col)*(p1.col-p2.col));
     }
-    void updateTdiValues(ArrayList<Position> path){
+    synchronized void updateTdiValues(ArrayList<Position> path){
         //This function is working
         double accummulator=0;
         for(int i=path.size()-2;i>-1;i--){
@@ -87,12 +87,13 @@ class Position{
         return "("+this.row+","+this.col+")";
     }
 }
-class Ant {
+class Ant implements Runnable{
     ArrayList<Position> path;
     double pathCost;
     Graph grid;
     int stepSize;
     int alpha,beta;
+    Thread t;
     public Ant(Graph grid,int stepSize,int alpha,int beta){
         this.grid = grid;
         this.path=new ArrayList<Position>();
@@ -202,13 +203,15 @@ class Ant {
         }
         return allowed.getLast();
     }
-    void findSolution(){
+    @Override
+    public void run(){
         Position goalPosition=new Position(grid.size-1,grid.size-1);
         this.path.add(new Position(0,0));
         for(int i=0;!path.get(i).equals(goalPosition);i++){
             this.path.add(nextPosition(path.get(i)));
             this.pathCost+=Graph.distance(this.path.get(i), this.path.get(i+1));
         }
+        grid.updateTdiValues(this.path);
     }
     void restartPath(){
         this.path.clear();
@@ -232,12 +235,20 @@ public class Main {
         //main logic
         for(int i=0;i<noOfIterations;i++){
             for(int j=0;j<noOfAnts;j++){
-                ants[j].findSolution();
+                ants[j].t=new Thread(ants[j]);
+                ants[j].t.start();
                 // System.out.print(ants[j].path.size()+" ");
             }
             for(int j=0;j<noOfAnts;j++){
-                grid.updateTdiValues(ants[j].path);
+                try{
+                ants[j].t.join();
+                }catch(InterruptedException e){
+                    System.err.println(e.getMessage());
+                }
             }
+            // for(int j=0;j<noOfAnts;j++){
+            //     grid.updateTdiValues(ants[j].path);
+            // }
             for(int j=0;j<noOfAnts;j++){
                 ants[j].restartPath();
             }
