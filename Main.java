@@ -14,11 +14,35 @@ class Graph{
         this.tdiValues=new double[size][size];
         this.index_data=new Position[size][size];
         this.size=size;
-        for(int i=0;i<size;i++){
-            for(int j=0;j<size;j++){
-                this.graph[i][j]= (i!=j) && (Math.random()<0.2);
+        for (int i = 0; i < 20; i++) {
+            for (int j = 0; j < 20; j++) {
+                this.graph[i][j] = false;
             }
         }
+        int[][] trueIndices = {
+            {0, 2}, {0, 3}, {0, 4}, {0, 5}, {0, 6}, {0, 7}, {0, 9}, {0, 10}, {0, 12}, {0, 13}, {0, 14}, {0, 15}, {0, 16}, {0, 17},
+            {2, 1}, {2, 4}, {2, 7}, {2, 8}, {2, 11}, {2, 14}, {2, 17}, {2, 18},
+            {3, 1}, {3, 4}, {3, 7}, {3, 8}, {3, 11}, {3, 14}, {3, 17}, {3, 18},
+            {4, 1}, {4, 4}, {4, 7}, {4, 8}, {4, 11}, {4, 14}, {4, 17}, {4, 18},
+            {6, 1}, {6, 6}, {6, 11}, {6, 16},
+            {7, 1}, {7, 4}, {7, 5}, {7, 6}, {7, 7}, {7, 8}, {7, 11}, {7, 14}, {7, 15}, {7, 16}, {7, 17}, {7, 18},
+            {8, 1}, {8, 6}, {8, 11}, {8,12}, {8, 16},
+            {10, 2}, {10, 3}, {10, 4}, {10, 5}, {10, 6}, {10, 7}, {10, 9}, {10, 10}, {10, 12}, {10, 13}, {10, 14}, {10, 15}, {10, 16}, {10, 17},
+            {12, 1}, {12, 4}, {12, 7}, {12, 8}, {12, 11}, {12, 14}, {12, 17}, {12, 18},
+            {13, 1}, {13, 4}, {13, 7}, {13, 8}, {13, 11}, {13, 14}, {13, 17}, {13, 18},
+            {14, 1}, {14, 4}, {14, 7}, {14, 8}, {14, 11}, {14, 14}, {14, 17}, {14, 18},
+            {16, 1}, {16, 6}, {16, 11}, {16, 16},
+            {17, 1}, {17, 4}, {17, 5}, {17, 6}, {17, 7}, {17, 8}, {17, 11}, {17, 14}, {17, 15}, {17, 16}, {17, 17}, {17, 18},
+            {18, 1}, {18, 6}, {18, 11}, {18,12}, {18, 16}
+        };
+        for (int[] index : trueIndices) {
+            this.graph[index[0]][index[1]] = true;
+        }
+        // for(int i=0;i<size;i++){
+        //     for(int j=0;j<size;j++){
+        //         this.graph[i][j]= (i!=j) && (Math.random()<0.3);
+        //     }
+        // }
     }
     void restartTdiValues(){
         double initialTdiValue=10*Graph.distance(new Position(0,0),new Position(this.tdiValues.length-1,this.tdiValues[0].length-1));
@@ -145,6 +169,10 @@ class Ant {
                 }
             }
         }
+        if(allowed.size()==0){
+            System.err.println("No solution for this graph");
+            return null;
+        }
         double[] probability=new double[allowed.size()];
         int indx=-1;
         double sum=0;
@@ -189,11 +217,46 @@ class Ant {
     }
 }
 public class Main {
-    public static void main(String[] args) {
-        //initialisation
-        int noOfAnts=1,noOfIterations=1000,stepSize=2;
+    Graph grid;
+    ArrayList<Position> solution;
+    double solutionCost=0;
+    public Main(){
+        int noOfAnts=50,noOfIterations=100,stepSize=3;
         int alpha=1,beta=7;
-        Graph grid=new Graph(10);
+        this.grid=new Graph(20);
+        Ant[] ants=new Ant[noOfAnts];
+        this.solution=new ArrayList<>();
+        for(int i=0;i<noOfAnts;i++){
+            ants[i]=new Ant(grid,stepSize,alpha,beta);
+        }
+        //main logic
+        for(int i=0;i<noOfIterations;i++){
+            for(int j=0;j<noOfAnts;j++){
+                ants[j].findSolution();
+                // System.out.print(ants[j].path.size()+" ");
+            }
+            for(int j=0;j<noOfAnts;j++){
+                grid.updateTdiValues(ants[j].path);
+            }
+            for(int j=0;j<noOfAnts;j++){
+                ants[j].restartPath();
+            }
+            System.out.print(i+", ");
+        }
+        Position goalPosition=new Position(grid.size-1,grid.size-1);
+        solution.addLast(new Position(0, 0));
+        while(!solution.getLast().equals(goalPosition)) {
+            solution.addLast(grid.index_data[solution.getLast().row][solution.getLast().col]);
+        }
+        for(int i=1;i<solution.size();i++){
+            this.solutionCost+=grid.distance(this.solution.get(i-1), this.solution.get(i));
+        }
+    }
+    /*public static void main(String[] args) {
+        //initialisation
+        int noOfAnts=1,noOfIterations=3,stepSize=1;
+        int alpha=1,beta=7;
+        Graph grid=new Graph(20);
         Ant[] ants=new Ant[noOfAnts];
         ArrayList<Position> solution=new ArrayList<>();
         for(int i=0;i<noOfAnts;i++){
@@ -203,7 +266,7 @@ public class Main {
         for(int i=0;i<noOfIterations;i++){
             for(int j=0;j<noOfAnts;j++){
                 ants[j].findSolution();
-                System.out.print(ants[j].path.size()+" ");
+                // System.out.print(ants[j].path.size()+" ");
             }
             for(int j=0;j<noOfAnts;j++){
                 grid.updateTdiValues(ants[j].path);
@@ -217,50 +280,5 @@ public class Main {
         while(!solution.getLast().equals(goalPosition)) {
             solution.addLast(grid.index_data[solution.getLast().row][solution.getLast().col]);
         }
-        System.out.println("solution :"+solution.size());
-        System.out.println(solution);
-    }
-    // public static boolean[][] test(){
-    //     Ant testAnt=new Ant(new Graph(20));
-    //     testAnt.isAllowed(new Position(0, 0),new Position(1,3));
-    //     testAnt.isAllowed(new Position(1,0),new Position(2,1));
-    //     testAnt.isAllowed(new Position(3,2),new Position(2,1));
-    //     testAnt.isAllowed(new Position(2,1),new Position(4,0));
-    //     testAnt.isAllowed(new Position(1,2),new Position(1,1));
-    //     testAnt.isAllowed(new Position(19,19),new Position(0,0));
-    //     testAnt.isAllowed(new Position(0,0),new Position(3,7));
-    //     return testAnt.grid.graph;
-    //     Graph grid=new Graph(5);
-    //     ArrayList<Position> path = new ArrayList<>();
-    //     for(int i=0;i<5;i++){
-    //         path.addLast(new Position(i, i));
-    //     }
-    //     System.out.println("Before :");
-    //     for(int i=0;i<5;i++){
-    //         for(int j=0;j<5;j++){
-    //             System.out.print(grid.tdiValues[i][j]+" ");
-    //         }
-    //         System.out.println();
-    //     }
-    //     for(int i=0;i<5;i++){
-    //         for(int j=0;j<5;j++){
-    //             System.out.print(grid.index_data[i][j]+" ");
-    //         }
-    //         System.out.println();
-    //     }
-    //     grid.updateTdiValues(path);
-    //     System.out.println("After :");
-    //     for(int i=0;i<5;i++){
-    //         for(int j=0;j<5;j++){
-    //             System.out.print(grid.tdiValues[i][j]+" ");
-    //         }
-    //         System.out.println();
-    //     }
-    //     for(int i=0;i<5;i++){
-    //         for(int j=0;j<5;j++){
-    //             System.out.print(grid.index_data[i][j]+" ");
-    //         }
-    //         System.out.println();
-    //     }
-    // }
+    }*/
 }

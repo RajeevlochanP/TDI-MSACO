@@ -28,18 +28,37 @@ public class Server {
             }
 
             // Generate JSON response
-            boolean[][] data =Main.test();
-            System.out.println();
-            StringBuilder jsonResponse = new StringBuilder("[");
-            for (int i = 0; i < data.length; i++) {
-                jsonResponse.append(Arrays.toString(data[i]));
-                if (i < data.length - 1) {
-                    jsonResponse.append(", ");
-                }
+            Main results=new Main();
+            int[][] solution = new int[results.solution.size()][2];
+            for (int i = 0; i < results.solution.size(); i++) {
+                solution[i][0] = results.solution.get(i).row;
+                solution[i][1] = results.solution.get(i).col;
             }
-            jsonResponse.append("]");
+            boolean[][] data =results.grid.graph;
+            // System.out.println();
+            // Manually build JSON string
+        StringBuilder jsonBuilder = new StringBuilder();
+        jsonBuilder.append("{");
+            
+        // Append grid data
+        jsonBuilder.append("\"grid\": [");
+        for (int i = 0; i < data.length; i++) {
+            jsonBuilder.append(Arrays.toString(data[i]));
+            if (i < data.length - 1) jsonBuilder.append(", ");
+        }
+        jsonBuilder.append("], ");
+    
+        // Append solution data
+        jsonBuilder.append("\"solution\": [");
+        for (int i = 0; i < solution.length; i++) {
+            jsonBuilder.append(Arrays.toString(solution[i]));
+            if (i < solution.length - 1) jsonBuilder.append(", ");
+        }
+        jsonBuilder.append("], ");
+        jsonBuilder.append("\"solutionCost\": "+results.solutionCost);
+        jsonBuilder.append("}");
 
-            byte[] responseBytes = jsonResponse.toString().getBytes();
+            byte[] responseBytes = jsonBuilder.toString().getBytes();
             t.getResponseHeaders().set("Content-Type", "application/json; charset=UTF-8");
             t.sendResponseHeaders(200, responseBytes.length);
 

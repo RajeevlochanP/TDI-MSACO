@@ -6,19 +6,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home</title>
     <style>
+        *{
+            margin: 0px;
+            padding: 0px;
+        }
         table {
             border-collapse: collapse;
-            width: 500px;
-            height: 500px;
+            position: absolute;
         }
-
         td {
             width: 20px;
             height: 20px;
+            box-sizing: border-box;
         }
 
         .white {
-            background-color: white;
+            background-color: transparent;
             border: 1px solid black;
         }
 
@@ -26,16 +29,23 @@
             background-color: black;
             border: 1px solid black;
         }
+        .purple {
+            background-color: purple;
+            border: 1px solid black;
+        }
+        body{
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
     </style>
 </head>
 
 <body>
-    <h3>Graph</h3>
-    <table>
-        <tbody>
-
-        </tbody>
-    </table>
+    <h1>Graph :</h1>
+        <table>
+            <tbody>
+            </tbody>
+        </table>
+        <canvas id="path-canvas" style="border:1px solid #000;"></canvas>
     <script>
         const tbodyElement = document.querySelector('tbody');
         let numericArray;
@@ -43,17 +53,49 @@
             let response = await fetch('http://localhost:8000/test');
             let resObj = await response.json();
             console.log(resObj);
-            numericArray = resObj.map(row => row.map(value => value ? 1 : 0));
-            numericArray.forEach(row => {
+            numericArray = resObj.grid.map(row => row.map(value => value ? 1 : 0));
+            const solution = resObj.solution;
+            numericArray.forEach((row,i) => {
             let tableRow = document.createElement('tr');
-            row.forEach(cellValue => {
+            row.forEach((cellValue,j) => {
                 let tableCell = document.createElement('td');
                 tableCell.className = cellValue === 1 ? 'black' : 'white';
                 tableRow.appendChild(tableCell);    
             });
-
             tbodyElement.appendChild(tableRow);
-        });
+            });
+            let html="<h1>Path Cost :"+resObj.solutionCost+" </h1>";
+            document.body.insertAdjacentHTML("beforeend",html);
+
+            //this is canvas drawing part
+            const canvas = document.getElementById("path-canvas");
+            const ctx = canvas.getContext("2d");
+
+            // Define the grid size
+            canvas.width=numericArray.length*20;
+            canvas.height=numericArray.length*20;
+            const gridSize = numericArray.length;
+            const cellSize = canvas.width / gridSize;
+            // console.log(canvas.width,canvas.height,gridSize,cellSize);
+            
+            // Draw the path on the canvas
+            ctx.beginPath();
+            ctx.strokeStyle = "rgba(0, 0, 0, 1)";
+            ctx.lineWidth = 2;
+
+            // Move to the first point
+            ctx.moveTo(resObj.solution[0][1] * cellSize+(cellSize/2), resObj.solution[0][0] * cellSize+(cellSize/2));
+
+            // Draw lines connecting the points
+            for (let i = 1; i < resObj.solution.length; i++) {
+                const x = (resObj.solution[i][1] * cellSize)+(cellSize/2);
+                const y = (resObj.solution[i][0] * cellSize)+(cellSize/2);
+                // console.log(x,y);
+                ctx.lineTo(x, y);
+            }
+
+            // Stroke the path
+            ctx.stroke();
         }
         fetchData();
     </script>
