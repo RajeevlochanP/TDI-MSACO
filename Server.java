@@ -56,7 +56,7 @@ public class Server {
                     jsonBuilder.append(", ");
             }
             jsonBuilder.append("], ");
-            jsonBuilder.append("\"solutionCost\": ").append(results.solutionCost).append(", ");
+            jsonBuilder.append("\"solutionCost\": ").append(results.solutionCost).append(",");
 
             // Append solutionsCost array
             jsonBuilder.append("\"solutionsCost\": [");

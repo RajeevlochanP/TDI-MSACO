@@ -9,6 +9,7 @@
 </head>
 
 <body>
+    <h1>TDI-MSACO</h1>
     <canvas id="gridCanvas" width="650" height="650"></canvas>
     <div id="myPlot" style="width:100%;max-width:700px"></div>
 </body>
@@ -84,37 +85,20 @@
 
             ctx.stroke();
         }
-        // //a graphhh
-        // const data = [{
-        //     x: resObj.solutionsCost.map((x, i) => i),
-        //     y: resObj.solutionsCost,
-        //     mode: "lines"
-        // }];
-
-        // // Define Layout
-        // const layout = {
-        //     xaxis: { range: [0, resObj.solutionsCost.length], title: "Number Of Iterations" },
-        //     yaxis: { range: [100, 175], title: "Best solution until Xth iteration" },
-        //     title: "House Prices vs. Size"
-        // };
-
-        // // Display using Plotly
-        // Plotly.newPlot("myPlot", data, layout);
-        var trace1 = {
+        const trace1 = {
             x: resObj.solutionsCost.map((x, i) => i),
             y: resObj.solutionsCost,
             type: 'scatter'
         };
-
-        var trace2 = {
-            x: [1, 2, 3, 4],
-            y: [16, 5, 11, 9],
-            type: 'scatter'
+        const layout = {
+            xaxis: { range: [0, resObj.solutionsCost.length], title: {text:"Number Of Iterations"} },
+            yaxis: {title: {text:"Best solution until Xth iteration"} },
+            title: {text:"Tdi-MSACO"}
         };
-
         var data = [trace1];
 
-        Plotly.newPlot('myPlot', data);
+        Plotly.newPlot('myPlot', data,layout);
+        document.body.insertAdjacentHTML("beforeend",`<h2> SolutionCost : ${resObj.solutionCost}</h2>`);
     }
 
     visualize();
