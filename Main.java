@@ -63,17 +63,28 @@ class Graph{
         return Math.sqrt((p1.row-p2.row)*(p1.row-p2.row)+(p1.col-p2.col)*(p1.col-p2.col));
     }
     // synchronized void updateTdiValues(ArrayList<Position> path){
+    //     double accummulator=0;
     //     for(int i=path.size()-2;i>-1;i--){
-    //         if(distance(path.get(i),path.get(i+1))+tdiValues[path.get(i+1).row][path.get(i+1).col]<tdiValues[path.get(i).row][path.get(i).col]){
-    //             this.tdiValues[path.get(i).row][path.get(i).col]=distance(path.get(i),path.get(i+1))+tdiValues[path.get(i+1).row][path.get(i+1).col];
+    //         accummulator+=distance(path.get(i),path.get(i+1));
+    //         if(accummulator<tdiValues[path.get(i).row][path.get(i).col]){
+    //             this.tdiValues[path.get(i).row][path.get(i).col]=accummulator;
     //             this.index_data[path.get(i).row][path.get(i).col].row=path.get(i+1).row;
     //             this.index_data[path.get(i).row][path.get(i).col].col=path.get(i+1).col;
+    //         }else{
+    //             accummulator=tdiValues[path.get(i).row][path.get(i).col];
     //         }
     //     }
     //     return;
     // }
     synchronized void updateTdiValues(ArrayList<Position> path){
+        // double accummulator=0;
+        // for(int i=0;i<path.size();i++){
+        //     System.out.print(path.get(i));
+        // }
+        // System.out.println();
         for(int i=path.size()-2;i>-1;i--){
+            // accummulator+=distance(path.get(i),path.get(i+1));
+            // System.out.println(distance(path.get(i),path.get(i+1))+tdiValues[path.get(i+1).row][path.get(i+1).col]+","+tdiValues[path.get(i).row][path.get(i).col]+"\nacc :"+accummulator);
             if(distance(path.get(i),path.get(i+1))+tdiValues[path.get(i+1).row][path.get(i+1).col]<tdiValues[path.get(i).row][path.get(i).col]){
                 this.tdiValues[path.get(i).row][path.get(i).col]=distance(path.get(i),path.get(i+1))+tdiValues[path.get(i+1).row][path.get(i+1).col];
                 this.index_data[path.get(i).row][path.get(i).col].row=path.get(i+1).row;
@@ -90,6 +101,17 @@ class Graph{
                             }
                         }
                     }
+                    // System.out.println("Accumulator :"+accummulator);
+                    // System.out.println("Position :"+path.get(i));
+                    // System.out.println(queue+" temp :"+temp);
+                    // for(int j=0;j<size;j++){
+                    //     for(int k=0;k<size;k++){
+                    //         System.out.print(index_data[j][k]+",");
+                    //         System.out.printf("%.2f ",tdiValues[j][k]);
+                    //     }
+                    //     System.out.println();
+                    // }
+                    // System.out.println();
                 }
             }
         }
@@ -250,7 +272,7 @@ public class Main {
     ArrayList<ArrayList<Position>> solutions;
     double[] solutionsCost;
     public Main(){
-        int noOfAnts=20,noOfIterations=50,stepSize=5;
+        int noOfAnts=20,noOfIterations=50,stepSize=3;
         int alpha=1,beta=7;
         this.solutions=new ArrayList<>();
         this.solutionsCost=new double[noOfIterations];
