@@ -20,6 +20,11 @@
         let response = await fetch('http://localhost:8000/test');
         let resObj = await response.json();
         console.log(resObj);
+        let distance=0;
+        for(let i=1;i<resObj.solution.length;i++){
+            distance+=Math.sqrt(((resObj.solution[i][0]-resObj.solution[i-1][0])*(resObj.solution[i][0]-resObj.solution[i-1][0]))+((resObj.solution[i][1]-resObj.solution[i-1][1])*(resObj.solution[i][1]-resObj.solution[i-1][1])));
+        }
+        console.log(distance);
         const canvas = document.getElementById('gridCanvas');
         const ctx = canvas.getContext('2d');
         const grid = resObj.grid;       // 2D boolean array

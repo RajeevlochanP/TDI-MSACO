@@ -14,39 +14,36 @@ class Graph{
         this.tdiValues=new double[size][size];
         this.index_data=new Position[size][size];
         this.size=size;
-        for (int i = 0; i < 20; i++) {
-            for (int j = 0; j < 20; j++) {
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
                 this.graph[i][j] = false;
             }
         }
-        int[][] trueIndices = {
-            {0, 2}, {0, 3}, {0, 4}, {0, 5}, {0, 6}, {0, 7}, {0, 9}, {0, 10}, {0, 12}, {0, 13}, {0, 14}, {0, 15}, {0, 16}, {0, 17},
-            {2, 1}, {2, 4}, {2, 7}, {2, 8}, {2, 11}, {2, 14}, {2, 17}, {2, 18},
-            {3, 1}, {3, 4}, {3, 7}, {3, 8}, {3, 11}, {3, 14}, {3, 17}, {3, 18},
-            {4, 1}, {4, 4}, {4, 7}, {4, 8}, {4, 11}, {4, 14}, {4, 17}, {4, 18},
-            {6, 1}, {6, 6}, {6, 11}, {6, 16},
-            {7, 1}, {7, 4}, {7, 5}, {7, 6}, {7, 7}, {7, 8}, {7, 11}, {7, 14}, {7, 15}, {7, 16}, {7, 17}, {7, 18},
-            {8, 1}, {8, 6}, {8, 11}, {8,12}, {8, 16},
-            {10, 2}, {10, 3}, {10, 4}, {10, 5}, {10, 6}, {10, 7}, {10, 9}, {10, 10}, {10, 12}, {10, 13}, {10, 14}, {10, 15}, {10, 16}, {10, 17},
-            {12, 1}, {12, 4}, {12, 7}, {12, 8}, {12, 11}, {12, 14}, {12, 17}, {12, 18},
-            {13, 1}, {13, 4}, {13, 7}, {13, 8}, {13, 11}, {13, 14}, {13, 17}, {13, 18},
-            {14, 1}, {14, 4}, {14, 7}, {14, 8}, {14, 11}, {14, 14}, {14, 17}, {14, 18},
-            {16, 1}, {16, 6}, {16, 11}, {16, 16},
-            {17, 1}, {17, 4}, {17, 5}, {17, 6}, {17, 7}, {17, 8}, {17, 11}, {17, 14}, {17, 15}, {17, 16}, {17, 17}, {17, 18},
-            {18, 1}, {18, 6}, {18, 11}, {18,12}, {18, 16}
+        // int[][] trueIndices = {
+        //     {0, 2}, {0, 3}, {0, 4}, {0, 5}, {0, 6}, {0, 7}, {0, 9}, {0, 10}, {0, 12}, {0, 13}, {0, 14}, {0, 15}, {0, 16}, {0, 17},
+        //     {2, 1}, {2, 4}, {2, 7}, {2, 8}, {2, 11}, {2, 14}, {2, 17}, {2, 18},
+        //     {3, 1}, {3, 4}, {3, 7}, {3, 8}, {3, 11}, {3, 14}, {3, 17}, {3, 18},
+        //     {4, 1}, {4, 4}, {4, 7}, {4, 8}, {4, 11}, {4, 14}, {4, 17}, {4, 18},
+        //     {6, 1}, {6, 6}, {6, 11}, {6, 16},
+        //     {7, 1}, {7, 4}, {7, 5}, {7, 6}, {7, 7}, {7, 8}, {7, 11}, {7, 14}, {7, 15}, {7, 16}, {7, 17}, {7, 18},
+        //     {8, 1}, {8, 6}, {8, 11}, {8,12}, {8, 16},
+        //     {10, 2}, {10, 3}, {10, 4}, {10, 5}, {10, 6}, {10, 7}, {10, 9}, {10, 10}, {10, 12}, {10, 13}, {10, 14}, {10, 15}, {10, 16}, {10, 17},
+        //     {12, 1}, {12, 4}, {12, 7}, {12, 8}, {12, 11}, {12, 14}, {12, 17}, {12, 18},
+        //     {13, 1}, {13, 4}, {13, 7}, {13, 8}, {13, 11}, {13, 14}, {13, 17}, {13, 18},
+        //     {14, 1}, {14, 4}, {14, 7}, {14, 8}, {14, 11}, {14, 14}, {14, 17}, {14, 18},
+        //     {16, 1}, {16, 6}, {16, 11}, {16, 16},
+        //     {17, 1}, {17, 4}, {17, 5}, {17, 6}, {17, 7}, {17, 8}, {17, 11}, {17, 14}, {17, 15}, {17, 16}, {17, 17}, {17, 18},
+        //     {18, 1}, {18, 6}, {18, 11}, {18,12}, {18, 16}
+        // };
+        int[][] trueIndices={
+            {0,1}
         };
         for (int[] index : trueIndices) {
             this.graph[index[0]][index[1]] = true;
         }
-        // for(int i=0;i<size;i++){
-        //     for(int j=0;j<size;j++){
-        //         this.graph[i][j]= (i!=j) && (Math.random()<0.3);
-        //     }
-        // }
     }
     void restartTdiValues(){
-        double initialTdiValue=10*Graph.distance(new Position(0,0),new Position(this.tdiValues.length-1,this.tdiValues[0].length-1));
-        // Position initialPosition=new Position(0, 0);
+        double initialTdiValue=50*Graph.distance(new Position(0,0),new Position(this.tdiValues.length-1,this.tdiValues[0].length-1));
         for(int i=0;i<this.tdiValues.length;i++){
             for(int j=0;j<tdiValues[0].length;j++){
                 this.tdiValues[i][j]=initialTdiValue;
@@ -123,11 +120,9 @@ class Ant implements Runnable{
         int steps = (int) Math.max(Math.abs(dx), Math.abs(dy)) * 1000;
         double xinc = dx / steps;
         double yinc = dy / steps;
-        // System.out.println(xinc+" "+yinc);
         for (int k = 0; k < steps; k++) {
             i1 += xinc;
             j1 += yinc;
-            // System.out.println("("+i1+","+j1+")");
             int i,j;
             if(Math.abs(Math.ceil(i1)-i1)<1e-9){
                 i = (int) Math.ceil(i1);
@@ -211,7 +206,6 @@ class Ant implements Runnable{
             this.path.add(nextPosition(path.get(i)));
             this.pathCost+=Graph.distance(this.path.get(i), this.path.get(i+1));
         }
-        grid.updateTdiValues(this.path);
     }
     void restartPath(){
         this.path.clear();
@@ -226,7 +220,7 @@ public class Main {
     ArrayList<ArrayList<Position>> solutions;
     double[] solutionsCost;
     public Main(){
-        int noOfAnts=1,noOfIterations=20,stepSize=3;
+        int noOfAnts=1,noOfIterations=2,stepSize=3;
         int alpha=1,beta=7;
         this.solutions=new ArrayList<>();
         this.solutionsCost=new double[noOfIterations];
@@ -239,10 +233,10 @@ public class Main {
         }
         //main logic
         for(int i=0;i<noOfIterations;i++){
+            System.out.println("Tdi value of (0,0) :"+grid.tdiValues[0][0]);
             for(int j=0;j<noOfAnts;j++){
                 ants[j].t=new Thread(ants[j]);
                 ants[j].t.start();
-                // System.out.print(ants[j].path.size()+" ");
             }
             for(int j=0;j<noOfAnts;j++){
                 try{
@@ -251,14 +245,14 @@ public class Main {
                     System.err.println(e.getMessage());
                 }
             }
-            // for(int j=0;j<noOfAnts;j++){
-            //     grid.updateTdiValues(ants[j].path);
-            // }
+            for(int j=0;j<noOfAnts;j++){
+                grid.updateTdiValues(ants[j].path);
+            }
             for(int j=0;j<noOfAnts;j++){
                 ants[j].restartPath();
             }
             System.out.print(i+", ");
-            // //trying to get solution from every iteration
+            //trying to get solution from every iteration
             this.solutions.addLast(new ArrayList<Position>());
             this.solutions.getLast().addLast(new Position(0, 0));
             while(!this.solutions.getLast().getLast().equals(goalPosition)) {
@@ -276,35 +270,37 @@ public class Main {
         for(int j=1;j<solution.size();j++){
             this.solutionCost+=grid.distance(this.solution.get(j-1), this.solution.get(j));
         }
-        // System.out.println(solutionsCost[0]);
+        System.out.println("Tdi value of (0,0) :"+grid.tdiValues[0][0]);
     }
-    /*public static void main(String[] args) {
-        //initialisation
-        int noOfAnts=1,noOfIterations=3,stepSize=1;
-        int alpha=1,beta=7;
-        Graph grid=new Graph(20);
-        Ant[] ants=new Ant[noOfAnts];
-        ArrayList<Position> solution=new ArrayList<>();
-        for(int i=0;i<noOfAnts;i++){
-            ants[i]=new Ant(grid,stepSize,alpha,beta);
-        }
-        //main logic
-        for(int i=0;i<noOfIterations;i++){
-            for(int j=0;j<noOfAnts;j++){
-                ants[j].findSolution();
-                // System.out.print(ants[j].path.size()+" ");
+    public static void main(String[] args) {
+        Graph grid=new Graph(5);
+        ArrayList<Position> path1=new ArrayList<>(Arrays.asList(new Position(0, 0),new Position(1, 1),new Position(3, 3),new Position(2, 4),new Position(4, 4)));
+        ArrayList<Position> path2=new ArrayList<>(Arrays.asList(new Position(0, 0),new Position(1, 2),new Position(3, 3),new Position(4, 4)));
+        grid.updateTdiValues(path1);
+        for(int i=0;i<5;i++){
+            for(int j=0;j<5;j++){
+                System.out.printf("%.2f ",grid.tdiValues[i][j]);
             }
-            for(int j=0;j<noOfAnts;j++){
-                grid.updateTdiValues(ants[j].path);
-            }
-            for(int j=0;j<noOfAnts;j++){
-                ants[j].restartPath();
-            }
+            System.out.println();
         }
-        Position goalPosition=new Position(grid.size-1,grid.size-1);
-        solution.addLast(new Position(0, 0));
-        while(!solution.getLast().equals(goalPosition)) {
-            solution.addLast(grid.index_data[solution.getLast().row][solution.getLast().col]);
+        for(int i=0;i<5;i++){
+            for(int j=0;j<5;j++){
+                System.out.print(grid.index_data[i][j]);
+            }
+            System.out.println();
         }
-    }*/
+        grid.updateTdiValues(path2);
+        for(int i=0;i<5;i++){
+            for(int j=0;j<5;j++){
+                System.out.printf("%.2f ",grid.tdiValues[i][j]);
+            }
+            System.out.println();
+        }
+        for(int i=0;i<5;i++){
+            for(int j=0;j<5;j++){
+                System.out.print(grid.index_data[i][j]);
+            }
+            System.out.println();
+        }
+    }
 }
