@@ -26,37 +26,47 @@ public class Server {
                 t.sendResponseHeaders(204, -1); // No content for preflight responses
                 return;
             }
-
             // Generate JSON response
-            Main results=new Main();
+            Main results = new Main();
             int[][] solution = new int[results.solution.size()][2];
             for (int i = 0; i < results.solution.size(); i++) {
                 solution[i][0] = results.solution.get(i).row;
                 solution[i][1] = results.solution.get(i).col;
             }
-            boolean[][] data =results.grid.graph;
+            boolean[][] data = results.grid.graph;
             // System.out.println();
             // Manually build JSON string
-        StringBuilder jsonBuilder = new StringBuilder();
-        jsonBuilder.append("{");
-            
-        // Append grid data
-        jsonBuilder.append("\"grid\": [");
-        for (int i = 0; i < data.length; i++) {
-            jsonBuilder.append(Arrays.toString(data[i]));
-            if (i < data.length - 1) jsonBuilder.append(", ");
-        }
-        jsonBuilder.append("], ");
-    
-        // Append solution data
-        jsonBuilder.append("\"solution\": [");
-        for (int i = 0; i < solution.length; i++) {
-            jsonBuilder.append(Arrays.toString(solution[i]));
-            if (i < solution.length - 1) jsonBuilder.append(", ");
-        }
-        jsonBuilder.append("], ");
-        jsonBuilder.append("\"solutionCost\": "+results.solutionCost);
-        jsonBuilder.append("}");
+            StringBuilder jsonBuilder = new StringBuilder();
+            jsonBuilder.append("{");
+
+            // Append grid data
+            jsonBuilder.append("\"grid\": [");
+            for (int i = 0; i < data.length; i++) {
+                jsonBuilder.append(Arrays.toString(data[i]));
+                if (i < data.length - 1)
+                    jsonBuilder.append(", ");
+            }
+            jsonBuilder.append("], ");
+
+            // Append solution data
+            jsonBuilder.append("\"solution\": [");
+            for (int i = 0; i < solution.length; i++) {
+                jsonBuilder.append(Arrays.toString(solution[i]));
+                if (i < solution.length - 1)
+                    jsonBuilder.append(", ");
+            }
+            jsonBuilder.append("], ");
+            jsonBuilder.append("\"solutionCost\": ").append(results.solutionCost).append(", ");
+
+            // Append solutionsCost array
+            jsonBuilder.append("\"solutionsCost\": [");
+            for (int i = 0; i < results.solutionsCost.length; i++) {
+                jsonBuilder.append(results.solutionsCost[i]);
+                if (i < results.solutionsCost.length - 1)
+                    jsonBuilder.append(", ");
+            }
+            jsonBuilder.append("]");
+            jsonBuilder.append("}");
 
             byte[] responseBytes = jsonBuilder.toString().getBytes();
             t.getResponseHeaders().set("Content-Type", "application/json; charset=UTF-8");

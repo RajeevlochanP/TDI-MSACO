@@ -46,11 +46,11 @@ class Graph{
     }
     void restartTdiValues(){
         double initialTdiValue=10*Graph.distance(new Position(0,0),new Position(this.tdiValues.length-1,this.tdiValues[0].length-1));
-        Position initialPosition=new Position(0, 0);
+        // Position initialPosition=new Position(0, 0);
         for(int i=0;i<this.tdiValues.length;i++){
             for(int j=0;j<tdiValues[0].length;j++){
                 this.tdiValues[i][j]=initialTdiValue;
-                this.index_data[i][j]=initialPosition;
+                this.index_data[i][j]=new Position(0, 0);
             }
         }
     }
@@ -58,13 +58,13 @@ class Graph{
         return Math.sqrt((p1.row-p2.row)*(p1.row-p2.row)+(p1.col-p2.col)*(p1.col-p2.col));
     }
     synchronized void updateTdiValues(ArrayList<Position> path){
-        //This function is working
         double accummulator=0;
         for(int i=path.size()-2;i>-1;i--){
             accummulator+=distance(path.get(i),path.get(i+1));
             if(accummulator<tdiValues[path.get(i).row][path.get(i).col]){
                 this.tdiValues[path.get(i).row][path.get(i).col]=accummulator;
-                this.index_data[path.get(i).row][path.get(i).col]=path.get(i+1);
+                this.index_data[path.get(i).row][path.get(i).col].row=path.get(i+1).row;
+                this.index_data[path.get(i).row][path.get(i).col].col=path.get(i+1).col;
             }else{
                 accummulator=tdiValues[path.get(i).row][path.get(i).col];
             }
@@ -223,12 +223,17 @@ public class Main {
     Graph grid;
     ArrayList<Position> solution;
     double solutionCost=0;
+    ArrayList<ArrayList<Position>> solutions;
+    double[] solutionsCost;
     public Main(){
-        int noOfAnts=50,noOfIterations=100,stepSize=3;
+        int noOfAnts=1,noOfIterations=20,stepSize=3;
         int alpha=1,beta=7;
+        this.solutions=new ArrayList<>();
+        this.solutionsCost=new double[noOfIterations];
         this.grid=new Graph(20);
         Ant[] ants=new Ant[noOfAnts];
         this.solution=new ArrayList<>();
+        Position goalPosition=new Position(grid.size-1,grid.size-1);
         for(int i=0;i<noOfAnts;i++){
             ants[i]=new Ant(grid,stepSize,alpha,beta);
         }
@@ -253,15 +258,25 @@ public class Main {
                 ants[j].restartPath();
             }
             System.out.print(i+", ");
+            // //trying to get solution from every iteration
+            this.solutions.addLast(new ArrayList<Position>());
+            this.solutions.getLast().addLast(new Position(0, 0));
+            while(!this.solutions.getLast().getLast().equals(goalPosition)) {
+                this.solutions.getLast().addLast(grid.index_data[this.solutions.getLast().getLast().row][this.solutions.getLast().getLast().col]);
+            }
+            this.solutionsCost[i]=0;
+            for(int j=1;j<this.solutions.getLast().size();j++){
+                this.solutionsCost[i]+=grid.distance(this.solutions.getLast().get(j-1), this.solutions.getLast().get(j));
+            }
         }
-        Position goalPosition=new Position(grid.size-1,grid.size-1);
-        solution.addLast(new Position(0, 0));
-        while(!solution.getLast().equals(goalPosition)) {
-            solution.addLast(grid.index_data[solution.getLast().row][solution.getLast().col]);
+        this.solution.addLast(new Position(0, 0));
+        while(!this.solution.getLast().equals(goalPosition)) {
+            this.solution.addLast(grid.index_data[this.solution.getLast().row][this.solution.getLast().col]);
         }
-        for(int i=1;i<solution.size();i++){
-            this.solutionCost+=grid.distance(this.solution.get(i-1), this.solution.get(i));
+        for(int j=1;j<solution.size();j++){
+            this.solutionCost+=grid.distance(this.solution.get(j-1), this.solution.get(j));
         }
+        // System.out.println(solutionsCost[0]);
     }
     /*public static void main(String[] args) {
         //initialisation

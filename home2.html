@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+    <script src="https://cdn.plot.ly/plotly-3.0.1.min.js"></script>
+</head>
+
+<body>
+    <canvas id="gridCanvas" width="650" height="650"></canvas>
+    <div id="myPlot" style="width:100%;max-width:700px"></div>
+</body>
+
+</html>
+
+<script>
+    async function visualize() {
+        let response = await fetch('http://localhost:8000/test');
+        let resObj = await response.json();
+        console.log(resObj);
+        const canvas = document.getElementById('gridCanvas');
+        const ctx = canvas.getContext('2d');
+        const grid = resObj.grid;       // 2D boolean array
+        const path = resObj.solution;       // 2D path array [[row, column], ...]
+
+        // Calculate cell dimensions
+        const rows = grid.length;
+        const cols = grid[0].length;
+        const cellWidth = canvas.width / cols;
+        const cellHeight = canvas.height / rows;
+
+        // Draw grid cells
+        for (let i = 0; i < rows; i++) {
+            for (let j = 0; j < cols; j++) {
+                ctx.fillStyle = grid[i][j] ? 'black' : 'white';
+                ctx.fillRect(j * cellWidth, i * cellHeight, cellWidth, cellHeight);
+            }
+        }
+
+        // Draw grid lines
+        ctx.strokeStyle = 'gray';
+        ctx.lineWidth = 1;
+        for (let i = 0; i <= rows; i++) {
+            ctx.beginPath();
+            ctx.moveTo(0, i * cellHeight);
+            ctx.lineTo(canvas.width, i * cellHeight);
+            ctx.stroke();
+        }
+        for (let j = 0; j <= cols; j++) {
+            ctx.beginPath();
+            ctx.moveTo(j * cellWidth, 0);
+            ctx.lineTo(j * cellWidth, canvas.height);
+            ctx.stroke();
+        }
+
+        // Draw path if it exists
+        if (path.length > 0) {
+            ctx.beginPath();
+            ctx.strokeStyle = 'red';
+            ctx.lineWidth = 1;
+
+            // Start at first point
+            const [firstRow, firstCol] = path[0];
+            ctx.moveTo(
+                (firstCol + 0.5) * cellWidth,
+                (firstRow + 0.5) * cellHeight
+            );
+
+            // Connect subsequent points
+            for (let i = 1; i < path.length; i++) {
+                const [row, col] = path[i];
+                ctx.lineTo(
+                    (col + 0.5) * cellWidth,
+                    (row + 0.5) * cellHeight
+                );
+            }
+
+            ctx.stroke();
+        }
+        // //a graphhh
+        // const data = [{
+        //     x: resObj.solutionsCost.map((x, i) => i),
+        //     y: resObj.solutionsCost,
+        //     mode: "lines"
+        // }];
+
+        // // Define Layout
+        // const layout = {
+        //     xaxis: { range: [0, resObj.solutionsCost.length], title: "Number Of Iterations" },
+        //     yaxis: { range: [100, 175], title: "Best solution until Xth iteration" },
+        //     title: "House Prices vs. Size"
+        // };
+
+        // // Display using Plotly
+        // Plotly.newPlot("myPlot", data, layout);
+        var trace1 = {
+            x: resObj.solutionsCost.map((x, i) => i),
+            y: resObj.solutionsCost,
+            type: 'scatter'
+        };
+
+        var trace2 = {
+            x: [1, 2, 3, 4],
+            y: [16, 5, 11, 9],
+            type: 'scatter'
+        };
+
+        var data = [trace1];
+
+        Plotly.newPlot('myPlot', data);
+    }
+
+    visualize();
+</script>
