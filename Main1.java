@@ -62,39 +62,39 @@ class Graph{
     static double distance(Position p1,Position p2){
         return Math.sqrt((p1.row-p2.row)*(p1.row-p2.row)+(p1.col-p2.col)*(p1.col-p2.col));
     }
-    // synchronized void updateTdiValues(ArrayList<Position> path){
-    //     for(int i=path.size()-2;i>-1;i--){
-    //         if(distance(path.get(i),path.get(i+1))+tdiValues[path.get(i+1).row][path.get(i+1).col]<tdiValues[path.get(i).row][path.get(i).col]){
-    //             this.tdiValues[path.get(i).row][path.get(i).col]=distance(path.get(i),path.get(i+1))+tdiValues[path.get(i+1).row][path.get(i+1).col];
-    //             this.index_data[path.get(i).row][path.get(i).col].row=path.get(i+1).row;
-    //             this.index_data[path.get(i).row][path.get(i).col].col=path.get(i+1).col;
-    //         }
-    //     }
-    //     return;
-    // }
     synchronized void updateTdiValues(ArrayList<Position> path){
         for(int i=path.size()-2;i>-1;i--){
             if(distance(path.get(i),path.get(i+1))+tdiValues[path.get(i+1).row][path.get(i+1).col]<tdiValues[path.get(i).row][path.get(i).col]){
                 this.tdiValues[path.get(i).row][path.get(i).col]=distance(path.get(i),path.get(i+1))+tdiValues[path.get(i+1).row][path.get(i+1).col];
                 this.index_data[path.get(i).row][path.get(i).col].row=path.get(i+1).row;
                 this.index_data[path.get(i).row][path.get(i).col].col=path.get(i+1).col;
-                ArrayDeque<Position> queue=new ArrayDeque<>();
-                queue.addLast(path.get(i));
-                while (!queue.isEmpty()){
-                    Position temp=queue.pollFirst();
-                    this.tdiValues[temp.row][temp.col]=Graph.distance(temp, this.index_data[temp.row][temp.col])+tdiValues[this.index_data[temp.row][temp.col].row][this.index_data[temp.row][temp.col].col];
-                    for(int j=0;j<size-1;j++){
-                        for(int k=0;k<size-1;k++){
-                            if(this.index_data[j][k].equals(temp)){
-                                queue.addLast(new Position(j, k));
-                            }
-                        }
-                    }
-                }
             }
         }
         return;
     }
+    // synchronized void updateTdiValues(ArrayList<Position> path){
+    //     for(int i=path.size()-2;i>-1;i--){
+    //         if(distance(path.get(i),path.get(i+1))+tdiValues[path.get(i+1).row][path.get(i+1).col]<tdiValues[path.get(i).row][path.get(i).col]){
+    //             this.tdiValues[path.get(i).row][path.get(i).col]=distance(path.get(i),path.get(i+1))+tdiValues[path.get(i+1).row][path.get(i+1).col];
+    //             this.index_data[path.get(i).row][path.get(i).col].row=path.get(i+1).row;
+    //             this.index_data[path.get(i).row][path.get(i).col].col=path.get(i+1).col;
+    //             ArrayDeque<Position> queue=new ArrayDeque<>();
+    //             queue.addLast(path.get(i));
+    //             while (!queue.isEmpty()){
+    //                 Position temp=queue.pollFirst();
+    //                 this.tdiValues[temp.row][temp.col]=Graph.distance(temp, this.index_data[temp.row][temp.col])+tdiValues[this.index_data[temp.row][temp.col].row][this.index_data[temp.row][temp.col].col];
+    //                 for(int j=0;j<size-1;j++){
+    //                     for(int k=0;k<size-1;k++){
+    //                         if(this.index_data[j][k].equals(temp)){
+    //                             queue.addLast(new Position(j, k));
+    //                         }
+    //                     }
+    //                 }
+    //             }
+    //         }
+    //     }
+    //     return;
+    // }
 }
 class Position{
     int row,col;
@@ -243,13 +243,13 @@ class Ant implements Runnable{
         return;
     }
 }
-public class Main {
+public class Main1 {
     Graph grid;
     ArrayList<Position> solution;
     double solutionCost=0;
     ArrayList<ArrayList<Position>> solutions;
     double[] solutionsCost;
-    public Main(){
+    public Main1(){
         int noOfAnts=20,noOfIterations=50,stepSize=5;
         int alpha=1,beta=7;
         this.solutions=new ArrayList<>();
