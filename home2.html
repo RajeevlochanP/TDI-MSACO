@@ -5,12 +5,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home</title>
+    <style>
+        body{
+            font-family: sans-serif;
+        }
+    </style>
     <script src="https://cdn.plot.ly/plotly-3.0.1.min.js"></script>
 </head>
 
 <body>
     <h1>TDI-MSACO</h1>
-    <canvas id="gridCanvas" width="650" height="650"></canvas>
+    <h2 style="display: inline-block;">My Enhanced</h2>
+    <h2 style="display: inline-block;margin-left: 40vw;">Research paper</h2>
+    <br>
+    <canvas id="gridCanvas" width="700" height="700"></canvas>
+    <canvas id="gridCanvas1" width="700" height="700"></canvas>
     <div id="myPlot" style="width:100%;max-width:700px"></div>
 </body>
 
@@ -21,16 +30,18 @@
         let response = await fetch('http://localhost:8000/test');
         let resObj = await response.json();
         console.log(resObj);
-        const canvas = document.getElementById('gridCanvas');
-        const ctx = canvas.getContext('2d');
-        const grid = resObj.grid;       // 2D boolean array
-        const path = resObj.solution;       // 2D path array [[row, column], ...]
+        //1
+
+        let canvas = document.getElementById('gridCanvas');
+        let ctx = canvas.getContext('2d');
+        let grid = resObj.grid;       // 2D boolean array
+        let path = resObj.solution;       // 2D path array [[row, column], ...]
 
         // Calculate cell dimensions
-        const rows = grid.length;
-        const cols = grid[0].length;
-        const cellWidth = canvas.width / cols;
-        const cellHeight = canvas.height / rows;
+        let rows = grid.length;
+        let cols = grid[0].length;
+        let cellWidth = canvas.width / cols;
+        let cellHeight = canvas.height / rows;
 
         // Draw grid cells
         for (let i = 0; i < rows; i++) {
@@ -80,20 +91,90 @@
 
             ctx.stroke();
         }
+
+        //2
+        canvas = document.getElementById('gridCanvas1');
+        ctx = canvas.getContext('2d');
+        grid = resObj.grid;       // 2D boolean array
+        path = resObj.solution1;       // 2D path array [[row, column], ...]
+
+        // Calculate cell dimensions
+        rows = grid.length;
+        cols = grid[0].length;
+        cellWidth = canvas.width / cols;
+        cellHeight = canvas.height / rows;
+
+        // Draw grid cells
+        for (let i = 0; i < rows; i++) {
+            for (let j = 0; j < cols; j++) {
+                ctx.fillStyle = grid[i][j] ? 'black' : 'white';
+                ctx.fillRect(j * cellWidth, i * cellHeight, cellWidth, cellHeight);
+            }
+        }
+
+        // Draw grid lines
+        ctx.strokeStyle = 'gray';
+        ctx.lineWidth = 1;
+        for (let i = 0; i <= rows; i++) {
+            ctx.beginPath();
+            ctx.moveTo(0, i * cellHeight);
+            ctx.lineTo(canvas.width, i * cellHeight);
+            ctx.stroke();
+        }
+        for (let j = 0; j <= cols; j++) {
+            ctx.beginPath();
+            ctx.moveTo(j * cellWidth, 0);
+            ctx.lineTo(j * cellWidth, canvas.height);
+            ctx.stroke();
+        }
+
+        // Draw path if it exists
+        if (path.length > 0) {
+            ctx.beginPath();
+            ctx.strokeStyle = 'red';
+            ctx.lineWidth = 1;
+
+            // Start at first point
+            const [firstRow, firstCol] = path[0];
+            ctx.moveTo(
+                (firstCol + 0.5) * cellWidth,
+                (firstRow + 0.5) * cellHeight
+            );
+
+            // Connect subsequent points
+            for (let i = 1; i < path.length; i++) {
+                const [row, col] = path[i];
+                ctx.lineTo(
+                    (col + 0.5) * cellWidth,
+                    (row + 0.5) * cellHeight
+                );
+            }
+
+            ctx.stroke();
+        }
+
+
         const trace1 = {
             x: resObj.solutionsCost.map((x, i) => i),
             y: resObj.solutionsCost,
-            type: 'scatter'
+            type: 'lines',
+            name: 'My enhanced'
         };
+        const trace2 = {
+            x: resObj.solutionsCost1.map((x,i)=>i),
+            y: resObj.solutionsCost1,
+            type: 'lines',
+            name: 'Research paper'
+        }
         const layout = {
             xaxis: { range: [0, resObj.solutionsCost.length], title: {text:"Number Of Iterations"} },
             yaxis: {title: {text:"Best solution until Xth iteration"} },
             title: {text:"Tdi-MSACO"}
         };
-        var data = [trace1];
+        var data = [trace1,trace2];
 
         Plotly.newPlot('myPlot', data,layout);
-        document.body.insertAdjacentHTML("beforeend",`<h2> SolutionCost : ${resObj.solutionCost}</h2>`);
+        document.body.insertAdjacentHTML("beforeend",`<h2> My EnhancedCost : ${resObj.solutionCost}</h2><h2> Research paper's Cost : ${resObj.solutionCost1}</h2>`);
     }
 
     visualize();

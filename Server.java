@@ -26,16 +26,26 @@ public class Server {
                 t.sendResponseHeaders(204, -1); // No content for preflight responses
                 return;
             }
-            // Generate JSON response
             Main results = new Main();
+            MainT results1 = new MainT(results.grid.graph);
+
+            // Process Main
             int[][] solution = new int[results.solution.size()][2];
             for (int i = 0; i < results.solution.size(); i++) {
                 solution[i][0] = results.solution.get(i).row;
                 solution[i][1] = results.solution.get(i).col;
             }
             boolean[][] data = results.grid.graph;
-            // System.out.println();
-            // Manually build JSON string
+
+            // Process Main1
+            int[][] solution1 = new int[results1.solution.size()][2];
+            for (int i = 0; i < results1.solution.size(); i++) {
+                solution1[i][0] = results1.solution.get(i).row;
+                solution1[i][1] = results1.solution.get(i).col;
+            }
+            boolean[][] data1 = results1.grid.graph;
+
+            // Build JSON string
             StringBuilder jsonBuilder = new StringBuilder();
             jsonBuilder.append("{");
 
@@ -56,7 +66,7 @@ public class Server {
                     jsonBuilder.append(", ");
             }
             jsonBuilder.append("], ");
-            jsonBuilder.append("\"solutionCost\": ").append(results.solutionCost).append(",");
+            jsonBuilder.append("\"solutionCost\": ").append(results.solutionCost).append(", ");
 
             // Append solutionsCost array
             jsonBuilder.append("\"solutionsCost\": [");
@@ -65,7 +75,36 @@ public class Server {
                 if (i < results.solutionsCost.length - 1)
                     jsonBuilder.append(", ");
             }
+            jsonBuilder.append("], ");
+
+            // Append grid1 data
+            jsonBuilder.append("\"grid1\": [");
+            for (int i = 0; i < data1.length; i++) {
+                jsonBuilder.append(Arrays.toString(data1[i]));
+                if (i < data1.length - 1)
+                    jsonBuilder.append(", ");
+            }
+            jsonBuilder.append("], ");
+
+            // Append solution1 data
+            jsonBuilder.append("\"solution1\": [");
+            for (int i = 0; i < solution1.length; i++) {
+                jsonBuilder.append(Arrays.toString(solution1[i]));
+                if (i < solution1.length - 1)
+                    jsonBuilder.append(", ");
+            }
+            jsonBuilder.append("], ");
+            jsonBuilder.append("\"solutionCost1\": ").append(results1.solutionCost).append(", ");
+
+            // Append solutionsCost1 array
+            jsonBuilder.append("\"solutionsCost1\": [");
+            for (int i = 0; i < results1.solutionsCost.length; i++) {
+                jsonBuilder.append(results1.solutionsCost[i]);
+                if (i < results1.solutionsCost.length - 1)
+                    jsonBuilder.append(", ");
+            }
             jsonBuilder.append("]");
+
             jsonBuilder.append("}");
 
             byte[] responseBytes = jsonBuilder.toString().getBytes();

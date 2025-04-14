@@ -1,16 +1,15 @@
-import java.lang.reflect.Array;
 import java.util.*;
-class Graph{
+class GraphT{
     boolean[][] graph;
     double[][] tdiValues;
     Position[][] index_data;
     int size;
-    public Graph(int size){
-        generateGraph(size);
+    public GraphT(int size){
+        generateGraphT(size);
         restartTdiValues();
         this.size=size;
     }
-    private void generateGraph(int size){
+    private void generateGraphT(int size){
         this.graph=new boolean[size][size];
         this.tdiValues=new double[size][size];
         this.index_data=new Position[size][size];
@@ -49,7 +48,7 @@ class Graph{
         // }
     }
     void restartTdiValues(){
-        double initialTdiValue=10*Graph.distance(new Position(0,0),new Position(this.tdiValues.length-1,this.tdiValues[0].length-1));
+        double initialTdiValue=10*GraphT.distance(new Position(0,0),new Position(this.tdiValues.length-1,this.tdiValues[0].length-1));
         // Position initialPosition=new Position(0, 0);
         for(int i=0;i<this.tdiValues.length;i++){
             for(int j=0;j<tdiValues[0].length;j++){
@@ -64,61 +63,38 @@ class Graph{
     }
     synchronized void updateTdiValues(ArrayList<Position> path){
         for(int i=path.size()-2;i>-1;i--){
-            if(distance(path.get(i),path.get(i+1))+tdiValues[path.get(i+1).row][path.get(i+1).col]<tdiValues[path.get(i).row][path.get(i).col]){
-                this.tdiValues[path.get(i).row][path.get(i).col]=distance(path.get(i),path.get(i+1))+tdiValues[path.get(i+1).row][path.get(i+1).col];
+            if(distance(path.get(i),path.get(i+1))+this.tdiValues[path.get(i+1).row][path.get(i+1).col]<this.tdiValues[path.get(i).row][path.get(i).col]){
+                this.tdiValues[path.get(i).row][path.get(i).col]=distance(path.get(i),path.get(i+1))+this.tdiValues[path.get(i+1).row][path.get(i+1).col];
                 this.index_data[path.get(i).row][path.get(i).col].row=path.get(i+1).row;
                 this.index_data[path.get(i).row][path.get(i).col].col=path.get(i+1).col;
             }
         }
         return;
     }
-    // synchronized void updateTdiValues(ArrayList<Position> path){
-    //     for(int i=path.size()-2;i>-1;i--){
-    //         if(distance(path.get(i),path.get(i+1))+tdiValues[path.get(i+1).row][path.get(i+1).col]<tdiValues[path.get(i).row][path.get(i).col]){
-    //             this.tdiValues[path.get(i).row][path.get(i).col]=distance(path.get(i),path.get(i+1))+tdiValues[path.get(i+1).row][path.get(i+1).col];
-    //             this.index_data[path.get(i).row][path.get(i).col].row=path.get(i+1).row;
-    //             this.index_data[path.get(i).row][path.get(i).col].col=path.get(i+1).col;
-    //             ArrayDeque<Position> queue=new ArrayDeque<>();
-    //             queue.addLast(path.get(i));
-    //             while (!queue.isEmpty()){
-    //                 Position temp=queue.pollFirst();
-    //                 this.tdiValues[temp.row][temp.col]=Graph.distance(temp, this.index_data[temp.row][temp.col])+tdiValues[this.index_data[temp.row][temp.col].row][this.index_data[temp.row][temp.col].col];
-    //                 for(int j=0;j<size-1;j++){
-    //                     for(int k=0;k<size-1;k++){
-    //                         if(this.index_data[j][k].equals(temp)){
-    //                             queue.addLast(new Position(j, k));
-    //                         }
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //     }
-    //     return;
-    // }
 }
-class Position{
-    int row,col;
-    Position(int row,int col){
-        this.row=row;
-        this.col=col;
-    }
-    @Override
-    public boolean equals(Object obj){
-        return (obj.getClass()==this.getClass()) && (((Position)obj).row == this.row) && (((Position)obj).col == this.col);
-    }
-    @Override
-    public String toString(){
-        return "("+this.row+","+this.col+")";
-    }
-}
-class Ant implements Runnable{
+// class Position{
+//     int row,col;
+//     Position(int row,int col){
+//         this.row=row;
+//         this.col=col;
+//     }
+//     @Override
+//     public boolean equals(Object obj){
+//         return (obj.getClass()==this.getClass()) && (((Position)obj).row == this.row) && (((Position)obj).col == this.col);
+//     }
+//     @Override
+//     public String toString(){
+//         return "("+this.row+","+this.col+")";
+//     }
+// }
+class AntT implements Runnable{
     ArrayList<Position> path;
     double pathCost;
-    Graph grid;
+    GraphT grid;
     int stepSize;
     int alpha,beta;
     Thread t;
-    public Ant(Graph grid,int stepSize,int alpha,int beta){
+    public AntT(GraphT grid,int stepSize,int alpha,int beta){
         this.grid = grid;
         this.path=new ArrayList<Position>();
         this.pathCost=0;
@@ -233,7 +209,7 @@ class Ant implements Runnable{
         this.path.add(new Position(0,0));
         for(int i=0;!path.get(i).equals(goalPosition);i++){
             this.path.add(nextPosition(path.get(i)));
-            this.pathCost+=Graph.distance(this.path.get(i), this.path.get(i+1));
+            this.pathCost+=GraphT.distance(this.path.get(i), this.path.get(i+1));
         }
         grid.updateTdiValues(this.path);
     }
@@ -243,23 +219,24 @@ class Ant implements Runnable{
         return;
     }
 }
-public class Main1 {
-    Graph grid;
+public class MainT {
+    GraphT grid;
     ArrayList<Position> solution;
     double solutionCost=0;
     ArrayList<ArrayList<Position>> solutions;
     double[] solutionsCost;
-    public Main1(){
-        int noOfAnts=20,noOfIterations=50,stepSize=5;
+    public MainT(boolean[][] graph){
+        int noOfAnts=1,noOfIterations=15,stepSize=3;
         int alpha=1,beta=7;
         this.solutions=new ArrayList<>();
         this.solutionsCost=new double[noOfIterations];
-        this.grid=new Graph(20);
-        Ant[] ants=new Ant[noOfAnts];
+        this.grid=new GraphT(20);
+        this.grid.graph=graph;
+        AntT[] ants=new AntT[noOfAnts];
         this.solution=new ArrayList<>();
         Position goalPosition=new Position(grid.size-1,grid.size-1);
         for(int i=0;i<noOfAnts;i++){
-            ants[i]=new Ant(grid,stepSize,alpha,beta);
+            ants[i]=new AntT(grid,stepSize,alpha,beta);
         }
         //main logic
         for(int i=0;i<noOfIterations;i++){
@@ -290,7 +267,7 @@ public class Main1 {
             }
             this.solutionsCost[i]=0;
             for(int j=1;j<this.solutions.getLast().size();j++){
-                this.solutionsCost[i]+=grid.distance(this.solutions.getLast().get(j-1), this.solutions.getLast().get(j));
+                this.solutionsCost[i]+=GraphT.distance(this.solutions.getLast().get(j-1), this.solutions.getLast().get(j));
             }
         }
         this.solution.addLast(new Position(0, 0));
@@ -298,7 +275,7 @@ public class Main1 {
             this.solution.addLast(grid.index_data[this.solution.getLast().row][this.solution.getLast().col]);
         }
         for(int j=1;j<solution.size();j++){
-            this.solutionCost+=grid.distance(this.solution.get(j-1), this.solution.get(j));
+            this.solutionCost+=GraphT.distance(this.solution.get(j-1), this.solution.get(j));
         }
         System.out.println("Tdi value of (0,0) :"+grid.tdiValues[0][0]);
     }
@@ -306,7 +283,7 @@ public class Main1 {
         //initialisation
         int noOfAnts=1,noOfIterations=3,stepSize=1;
         int alpha=1,beta=7;
-        Graph grid=new Graph(20);
+        GraphT grid=new GraphT(20);
         Ant[] ants=new Ant[noOfAnts];
         ArrayList<Position> solution=new ArrayList<>();
         for(int i=0;i<noOfAnts;i++){
@@ -332,7 +309,7 @@ public class Main1 {
         }
     }*/
     // public static void main(String[] args) {
-    //     Graph grid=new Graph(5);
+    //     GraphT grid=new GraphT(5);
     //     ArrayList<Position> path=new ArrayList<>(Arrays.asList(new Position(0,0),new Position(1,0),new Position(1,1),new Position(2,1),new Position(1,0),new Position(2,0),new Position(3,1),new Position(3,2),new Position(4, 4)));
     //     grid.updateTdiValues(path);
     // }
