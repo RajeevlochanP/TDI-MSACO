@@ -1,17 +1,17 @@
 import java.util.*;
-class GraphT{
+class GraphP{
     boolean[][] graph;
-    double[][] tdiValues;
+    double[][] phermoneValues;
     Position[][] index_data;
     int size;
-    public GraphT(int size){
-        generateGraphT(size);
-        restartTdiValues();
+    public GraphP(int size){
+        generateGraphP(size);
+        restartPhermoneValues();
         this.size=size;
     }
-    private void generateGraphT(int size){
+    private void generateGraphP(int size){
         this.graph=new boolean[size][size];
-        this.tdiValues=new double[size][size];
+        this.phermoneValues=new double[size*size][size*size];
         this.index_data=new Position[size][size];
         this.size=size;
         for (int i = 0; i < size; i++) {
@@ -19,9 +19,6 @@ class GraphT{
                 this.graph[i][j] = false;
             }
         }
-        // int[][] trueIndices = {
-        //     {0,1}
-        // };
         int[][] trueIndices = {
             {0, 2}, {0, 3}, {0, 4}, {0, 5}, {0, 6}, {0, 7}, {0, 9}, {0, 10}, {0, 12}, {0, 13}, {0, 14}, {0, 15}, {0, 16}, {0, 17},
             {2, 1}, {2, 4}, {2, 7}, {2, 8}, {2, 11}, {2, 14}, {2, 17}, {2, 18},
@@ -47,29 +44,21 @@ class GraphT{
         //     }
         // }
     }
-    void restartTdiValues(){
-        double initialTdiValue=10*GraphT.distance(new Position(0,0),new Position(this.tdiValues.length-1,this.tdiValues[0].length-1));
-        // Position initialPosition=new Position(0, 0);
-        for(int i=0;i<this.tdiValues.length;i++){
-            for(int j=0;j<tdiValues[0].length;j++){
-                this.tdiValues[i][j]=initialTdiValue;
-                this.index_data[i][j]=new Position(-1, -1);
+    void restartPhermoneValues(){
+        double initialPhermoneValue=1; //need to see what he used in research paper and update
+        for(int i=0;i<this.phermoneValues.length;i++){
+            for(int j=0;j<phermoneValues[0].length;j++){
+                this.phermoneValues[i][j]=initialPhermoneValue;
             }
         }
-        this.tdiValues[size-1][size-1]=0;
+        this.phermoneValues[size-1][size-1]=0;
     }
     static double distance(Position p1,Position p2){
         return Math.sqrt((p1.row-p2.row)*(p1.row-p2.row)+(p1.col-p2.col)*(p1.col-p2.col));
     }
-    synchronized void updateTdiValues(ArrayList<Position> path){
-        for(int i=path.size()-2;i>-1;i--){
-            if(distance(path.get(i),path.get(i+1))+this.tdiValues[path.get(i+1).row][path.get(i+1).col]<this.tdiValues[path.get(i).row][path.get(i).col]){
-                this.tdiValues[path.get(i).row][path.get(i).col]=distance(path.get(i),path.get(i+1))+this.tdiValues[path.get(i+1).row][path.get(i+1).col];
-                this.index_data[path.get(i).row][path.get(i).col].row=path.get(i+1).row;
-                this.index_data[path.get(i).row][path.get(i).col].col=path.get(i+1).col;
-            }
-        }
-        return;
+    synchronized void updatePhermoneValues(ArrayList<Position> path){
+        //Ali needs to implement this
+        int Q,evopRate; //need to set these
     }
 }
 // class Position{
@@ -87,14 +76,14 @@ class GraphT{
 //         return "("+this.row+","+this.col+")";
 //     }
 // }
-class AntT implements Runnable{
+class AntP implements Runnable{
     ArrayList<Position> path;
     double pathCost;
-    GraphT grid;
+    GraphP grid;
     int stepSize;
     int alpha,beta;
     Thread t;
-    public AntT(GraphT grid,int stepSize,int alpha,int beta){
+    public AntP(GraphP grid,int stepSize,int alpha,int beta){
         this.grid = grid;
         this.path=new ArrayList<Position>();
         this.pathCost=0;
@@ -154,7 +143,7 @@ class AntT implements Runnable{
     }
     
     private Position nextPosition(Position currPosition){
-        //Ali needs to implement this
+        //I will Implement this
         int row=currPosition.row;
         int col=currPosition.col;
         Position target=new Position(this.grid.size-1, this.grid.size-1);
@@ -180,7 +169,7 @@ class AntT implements Runnable{
         for(Position p:allowed) {
             int i=p.row;
             int j=p.col;
-            probability[++indx]=(Math.pow((1.0/this.grid.distance(p, target)), this.alpha)+Math.pow((1.0/this.grid.tdiValues[i][j]), this.beta));
+            probability[++indx]=(Math.pow(1.0/GraphP.distance(p, target), this.alpha)*Math.pow(this.grid.phermoneValues[row*this.grid.size+col][i*grid.size+j],this.beta));
             sum+=probability[indx];
         }
         for(int i=0;i<probability.length;i++) {
@@ -209,9 +198,24 @@ class AntT implements Runnable{
         this.path.add(new Position(0,0));
         for(int i=0;!path.get(i).equals(goalPosition);i++){
             this.path.add(nextPosition(path.get(i)));
-            this.pathCost+=GraphT.distance(this.path.get(i), this.path.get(i+1));
+            this.pathCost+=GraphP.distance(this.path.get(i), this.path.get(i+1));
         }
-        // grid.updateTdiValues(this.path); this is wrong
+        //here need to remove cycles after finding path
+        LinkedList<Position> p=new LinkedList<>(this.path);
+        for(int i=0;i<p.size();i++){
+            Position temp=p.get(i);
+            int lastIndex=p.lastIndexOf(temp);
+            for(int j=i+1;j<=lastIndex;j++){
+                p.remove(j);
+            }
+        }
+        this.path.clear();
+        this.path.addAll(p);
+        this.pathCost=0;
+        for(int i=1;i<this.path.size();i++){
+            this.pathCost+=GraphP.distance(this.path.get(i-1), this.path.get(i));
+        }
+        // grid.updatePhermoneValues(this.path); this is wrong
     }
     void restartPath(){
         this.path.clear();
@@ -219,24 +223,23 @@ class AntT implements Runnable{
         return;
     }
 }
-public class MainT {
-    GraphT grid;
+public class MainP {
+    GraphP grid;
     ArrayList<Position> solution;
     double solutionCost=0;
     ArrayList<ArrayList<Position>> solutions;
     double[] solutionsCost;
-    public MainT(boolean[][] graph){
+    public MainP(boolean[][] graph){
         int noOfAnts=1,noOfIterations=15,stepSize=3;
         int alpha=1,beta=7;
         this.solutions=new ArrayList<>();
         this.solutionsCost=new double[noOfIterations];
-        this.grid=new GraphT(20);
+        this.grid=new GraphP(20);
         this.grid.graph=graph;
-        AntT[] ants=new AntT[noOfAnts];
+        AntP[] ants=new AntP[noOfAnts];
         this.solution=new ArrayList<>();
-        Position goalPosition=new Position(grid.size-1,grid.size-1);
         for(int i=0;i<noOfAnts;i++){
-            ants[i]=new AntT(grid,stepSize,alpha,beta);
+            ants[i]=new AntP(grid,stepSize,alpha,beta);
         }
         //main logic
         for(int i=0;i<noOfIterations;i++){
@@ -253,37 +256,32 @@ public class MainT {
                 }
             }
             for(int j=0;j<noOfAnts;j++){
-                grid.updateTdiValues(ants[j].path);
-            }
-            for(int j=0;j<noOfAnts;j++){
-                ants[j].restartPath();
+                grid.updatePhermoneValues(ants[j].path);
             }
             System.out.print(i+", ");
             // //trying to get solution from every iteration
-            this.solutions.addLast(new ArrayList<Position>());
-            this.solutions.getLast().addLast(new Position(0, 0));
-            while(!this.solutions.getLast().getLast().equals(goalPosition)) {
-                this.solutions.getLast().addLast(grid.index_data[this.solutions.getLast().getLast().row][this.solutions.getLast().getLast().col]);
+            double minPathCost=ants[0].pathCost;
+            int antNumber=0;
+            for(int j=1;j<noOfAnts;j++){
+                if(minPathCost>ants[j].pathCost){
+                    minPathCost=ants[j].pathCost;
+                    antNumber=j;
+                }
             }
-            this.solutionsCost[i]=0;
-            for(int j=1;j<this.solutions.getLast().size();j++){
-                this.solutionsCost[i]+=GraphT.distance(this.solutions.getLast().get(j-1), this.solutions.getLast().get(j));
+            this.solutions.addLast((ArrayList<Position>)ants[antNumber].path.clone());
+            this.solutionsCost[i]=minPathCost;
+            for(int j=0;j<noOfAnts;j++){
+                ants[j].restartPath();
             }
         }
-        this.solution.addLast(new Position(0, 0));
-        while(!this.solution.getLast().equals(goalPosition)) {
-            this.solution.addLast(grid.index_data[this.solution.getLast().row][this.solution.getLast().col]);
-        }
-        for(int j=1;j<solution.size();j++){
-            this.solutionCost+=GraphT.distance(this.solution.get(j-1), this.solution.get(j));
-        }
-        System.out.println("Tdi value of (0,0) :"+grid.tdiValues[0][0]);
+        this.solution.addAll(this.solutions.getLast());
+        this.solutionCost=this.solutionsCost[noOfIterations-1];
     }
     /*public static void main(String[] args) {
         //initialisation
         int noOfAnts=1,noOfIterations=3,stepSize=1;
         int alpha=1,beta=7;
-        GraphT grid=new GraphT(20);
+        GraphP grid=new GraphP(20);
         Ant[] ants=new Ant[noOfAnts];
         ArrayList<Position> solution=new ArrayList<>();
         for(int i=0;i<noOfAnts;i++){
@@ -296,7 +294,7 @@ public class MainT {
                 // System.out.print(ants[j].path.size()+" ");
             }
             for(int j=0;j<noOfAnts;j++){
-                grid.updateTdiValues(ants[j].path);
+                grid.updatePhermoneValues(ants[j].path);
             }
             for(int j=0;j<noOfAnts;j++){
                 ants[j].restartPath();
@@ -309,8 +307,8 @@ public class MainT {
         }
     }*/
     // public static void main(String[] args) {
-    //     GraphT grid=new GraphT(5);
+    //     GraphP grid=new GraphP(5);
     //     ArrayList<Position> path=new ArrayList<>(Arrays.asList(new Position(0,0),new Position(1,0),new Position(1,1),new Position(2,1),new Position(1,0),new Position(2,0),new Position(3,1),new Position(3,2),new Position(4, 4)));
-    //     grid.updateTdiValues(path);
+    //     grid.updatePhermoneValues(path);
     // }
 }

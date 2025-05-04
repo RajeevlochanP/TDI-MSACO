@@ -207,7 +207,7 @@ class Ant implements Runnable{
         for(Position p:allowed) {
             int i=p.row;
             int j=p.col;
-            probability[++indx]=(Math.pow((1.0/this.grid.distance(p, target)), this.alpha)+Math.pow((1.0/this.grid.tdiValues[i][j]), this.beta));
+            probability[++indx]=(Math.pow((1.0/Graph.distance(p, target)), this.alpha)+Math.pow((1.0/this.grid.tdiValues[i][j]), this.beta));
             sum+=probability[indx];
         }
         for(int i=0;i<probability.length;i++) {
@@ -238,7 +238,7 @@ class Ant implements Runnable{
             this.path.add(nextPosition(path.get(i)));
             this.pathCost+=Graph.distance(this.path.get(i), this.path.get(i+1));
         }
-        grid.updateTdiValues(this.path);
+        // grid.updateTdiValues(this.path); this is wrong
     }
     void restartPath(){
         this.path.clear();
@@ -278,9 +278,9 @@ public class Main {
                     System.err.println(e.getMessage());
                 }
             }
-            // for(int j=0;j<noOfAnts;j++){
-            //     grid.updateTdiValues(ants[j].path);
-            // }
+            for(int j=0;j<noOfAnts;j++){
+                grid.updateTdiValues(ants[j].path);
+            }
             for(int j=0;j<noOfAnts;j++){
                 ants[j].restartPath();
             }
