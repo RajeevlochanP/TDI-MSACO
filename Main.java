@@ -253,7 +253,7 @@ public class Main {
     ArrayList<ArrayList<Position>> solutions;
     double[] solutionsCost;
     public Main(){
-        int noOfAnts=1,noOfIterations=15,stepSize=3;
+        int noOfAnts=10,noOfIterations=20,stepSize=3;
         int alpha=1,beta=7;
         this.solutions=new ArrayList<>();
         this.solutionsCost=new double[noOfIterations];
