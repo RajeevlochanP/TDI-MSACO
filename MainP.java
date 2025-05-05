@@ -1,9 +1,12 @@
 import java.util.*;
+
 class GraphP{
     boolean[][] graph;
     double[][] phermoneValues;
     Position[][] index_data;
     int size;
+    int Q=100;
+    double evopRate=0.9;
     public GraphP(int size){
         generateGraphP(size);
         restartPhermoneValues();
@@ -56,9 +59,22 @@ class GraphP{
     static double distance(Position p1,Position p2){
         return Math.sqrt((p1.row-p2.row)*(p1.row-p2.row)+(p1.col-p2.col)*(p1.col-p2.col));
     }
-    synchronized void updatePhermoneValues(ArrayList<Position> path){
+    synchronized void updatePhermoneValues(ArrayList<Position> path) {
         //Ali needs to implement this
-        int Q,evopRate; //need to set these
+        // pheromone at each = Q/Path length &&  cycles already removed...
+        double pathLength=0;
+        for(int i=0;i<path.size()-1;i++) {
+            pathLength+=distance(path.get(i), path.get(i+1));
+        }
+        for(int i=0;i<path.size()-1;i++) {
+            Position st=path.get(i);
+            Position nxt=path.get(i+1);
+            int row=(st.row)*this.size+st.col;
+            int col=(nxt.row)*this.size+nxt.col;
+            // Evaporate this value before calling update pheromone
+            this.phermoneValues[row][col] +=((this.Q)*(GraphP.distance(st, nxt)))/(pathLength*pathLength);
+        }
+
     }
 }
 // class Position{
@@ -169,7 +185,7 @@ class AntP implements Runnable{
         for(Position p:allowed) {
             int i=p.row;
             int j=p.col;
-            probability[++indx]=(Math.pow(1.0/GraphP.distance(p, target), this.alpha)*Math.pow(this.grid.phermoneValues[row*this.grid.size+col][i*grid.size+j],this.beta));
+            probability[++indx]=(Math.pow((1.0/GraphP.distance(p, target)), this.alpha)*Math.pow(this.grid.phermoneValues[row*this.grid.size+col][i*grid.size+j],this.beta));
             sum+=probability[indx];
         }
         for(int i=0;i<probability.length;i++) {
@@ -205,8 +221,9 @@ class AntP implements Runnable{
         for(int i=0;i<p.size();i++){
             Position temp=p.get(i);
             int lastIndex=p.lastIndexOf(temp);
-            for(int j=i+1;j<=lastIndex;j++){
-                p.remove(j);
+            int length=lastIndex-i;
+            for(int j=0;j<length;j++){
+                p.remove(i+1);
             }
         }
         this.path.clear();
@@ -230,8 +247,8 @@ public class MainP {
     ArrayList<ArrayList<Position>> solutions;
     double[] solutionsCost;
     public MainP(boolean[][] graph){
-        int noOfAnts=1,noOfIterations=15,stepSize=3;
-        int alpha=1,beta=7;
+        int noOfAnts=1,noOfIterations=15,stepSize=1;
+        int alpha=1,beta=5;
         this.solutions=new ArrayList<>();
         this.solutionsCost=new double[noOfIterations];
         this.grid=new GraphP(20);
@@ -242,7 +259,7 @@ public class MainP {
             ants[i]=new AntP(grid,stepSize,alpha,beta);
         }
         //main logic
-        for(int i=0;i<noOfIterations;i++){
+        for(int i=0;i<noOfIterations;i++) {
             for(int j=0;j<noOfAnts;j++){
                 ants[j].t=new Thread(ants[j]);
                 ants[j].t.start();
@@ -253,6 +270,11 @@ public class MainP {
                 ants[j].t.join();
                 }catch(InterruptedException e){
                     System.err.println(e.getMessage());
+                }
+            }
+            for(int row=0;row<grid.phermoneValues.length;row++) {
+                for(int col=0;col<grid.phermoneValues.length;col++) {
+                    grid.phermoneValues[row][col]=grid.evopRate*(grid.phermoneValues[row][col]);
                 }
             }
             for(int j=0;j<noOfAnts;j++){
@@ -270,10 +292,25 @@ public class MainP {
             }
             this.solutions.addLast((ArrayList<Position>)ants[antNumber].path.clone());
             this.solutionsCost[i]=minPathCost;
+            if(i==0){
+                this.solution.clear();
+                this.solution.addAll(this.solutions.getLast());
+                this.solutionCost=this.solutionsCost[i];
+            }else{
+                if(this.solutionCost>this.solutionsCost[i]){
+                    this.solutionCost=this.solutionsCost[i];
+                    this.solution.clear();
+                    this.solution.addAll(this.solutions.getLast());
+                }else{
+                    this.solutionsCost[i]=this.solutionCost;
+                    this.solutions.add(i,this.solution);
+                }
+            }
             for(int j=0;j<noOfAnts;j++){
                 ants[j].restartPath();
             }
         }
+        this.solution.clear();
         this.solution.addAll(this.solutions.getLast());
         this.solutionCost=this.solutionsCost[noOfIterations-1];
     }

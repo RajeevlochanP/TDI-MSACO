@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home</title>
     <style>
-        body{
+        body {
             font-family: sans-serif;
         }
     </style>
@@ -20,7 +20,11 @@
     <br>
     <canvas id="gridCanvas" width="700" height="700"></canvas>
     <canvas id="gridCanvas1" width="700" height="700"></canvas>
-    <div id="myPlot" style="width:100%;max-width:700px"></div>
+    <br>
+    <h2 style="display: inline-block;">MSACO</h2>
+    <br>
+    <canvas id="gridCanvas2" width="700" height="700"></canvas>
+    <div id="myPlot" style="width:100%;max-width:700px;"></div>
 </body>
 
 </html>
@@ -152,8 +156,66 @@
 
             ctx.stroke();
         }
+        //3
+        canvas = document.getElementById('gridCanvas2');
+        ctx = canvas.getContext('2d');
+        grid = resObj.grid;       // 2D boolean array
+        path = resObj.solution2;       // 2D path array [[row, column], ...]
 
+        // Calculate cell dimensions
+        rows = grid.length;
+        cols = grid[0].length;
+        cellWidth = canvas.width / cols;
+        cellHeight = canvas.height / rows;
 
+        // Draw grid cells
+        for (let i = 0; i < rows; i++) {
+            for (let j = 0; j < cols; j++) {
+                ctx.fillStyle = grid[i][j] ? 'black' : 'white';
+                ctx.fillRect(j * cellWidth, i * cellHeight, cellWidth, cellHeight);
+            }
+        }
+
+        // Draw grid lines
+        ctx.strokeStyle = 'gray';
+        ctx.lineWidth = 1;
+        for (let i = 0; i <= rows; i++) {
+            ctx.beginPath();
+            ctx.moveTo(0, i * cellHeight);
+            ctx.lineTo(canvas.width, i * cellHeight);
+            ctx.stroke();
+        }
+        for (let j = 0; j <= cols; j++) {
+            ctx.beginPath();
+            ctx.moveTo(j * cellWidth, 0);
+            ctx.lineTo(j * cellWidth, canvas.height);
+            ctx.stroke();
+        }
+
+        // Draw path if it exists
+        if (path.length > 0) {
+            ctx.beginPath();
+            ctx.strokeStyle = 'red';
+            ctx.lineWidth = 1;
+
+            // Start at first point
+            const [firstRow, firstCol] = path[0];
+            ctx.moveTo(
+                (firstCol + 0.5) * cellWidth,
+                (firstRow + 0.5) * cellHeight
+            );
+
+            // Connect subsequent points
+            for (let i = 1; i < path.length; i++) {
+                const [row, col] = path[i];
+                ctx.lineTo(
+                    (col + 0.5) * cellWidth,
+                    (row + 0.5) * cellHeight
+                );
+            }
+
+            ctx.stroke();
+        }
         const trace1 = {
             x: resObj.solutionsCost.map((x, i) => i),
             y: resObj.solutionsCost,
@@ -161,21 +223,28 @@
             name: 'My enhanced'
         };
         const trace2 = {
-            x: resObj.solutionsCost1.map((x,i)=>i),
+            x: resObj.solutionsCost1.map((x, i) => i),
             y: resObj.solutionsCost1,
             type: 'lines',
             name: 'Research paper'
         }
+        const trace3= {
+            x: resObj.solutionsCost2.map((x,i)=>i),
+            y: resObj.solutionsCost2,
+            type: 'lines',
+            name: 'MSACO'
+        }
         const layout = {
-            xaxis: { range: [0, resObj.solutionsCost.length], title: {text:"Number Of Iterations"} },
-            yaxis: {title: {text:"Best solution until Xth iteration"} },
-            title: {text:"Tdi-MSACO"}
+            xaxis: { range: [0, resObj.solutionsCost2.length], title: { text: "Number Of Iterations" } },
+            yaxis: { title: { text: "Best solution until Xth iteration" } },
+            title: { text: "Comparison" }
         };
-        var data = [trace1,trace2];
+        var data = [trace1, trace2,trace3];
 
-        Plotly.newPlot('myPlot', data,layout);
-        document.body.insertAdjacentHTML("beforeend",`<h2> My EnhancedCost : ${resObj.solutionCost}</h2><h2> Research paper's Cost : ${resObj.solutionCost1}</h2>`);
+        Plotly.newPlot('myPlot', data, layout);
+        document.body.insertAdjacentHTML("beforeend", `<h2> My EnhancedCost : ${resObj.solutionCost}</h2><h2> Research paper's Cost : ${resObj.solutionCost1}</h2><h2> MSACO cost : ${resObj.solutionCost2} </h2>`);
     }
 
     visualize();
+
 </script>
