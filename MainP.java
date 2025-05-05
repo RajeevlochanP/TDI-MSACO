@@ -5,8 +5,8 @@ class GraphP{
     double[][] phermoneValues;
     Position[][] index_data;
     int size;
-    int Q=30;
-    double evopRate=0.5;
+    int Q=1;
+    double evopRate=0.6;
     public GraphP(int size){
         generateGraphP(size);
         restartPhermoneValues();
@@ -72,7 +72,7 @@ class GraphP{
             int row=(st.row)*this.size+st.col;
             int col=(nxt.row)*this.size+nxt.col;
             // Evaporate this value before calling update pheromone
-            this.phermoneValues[row][col] +=((this.Q)*(GraphP.distance(st, nxt)))/(pathLength*pathLength);
+            this.phermoneValues[row][col] +=(((double)this.Q)*(GraphP.distance(st, nxt)))/(pathLength*pathLength);
         }
 
     }
@@ -319,6 +319,9 @@ public class MainP {
 
         //new graphs
         for(int k=1;k<=9;k++){
+            for(int j=0;j<noOfAnts;j++){
+                ants[j].restartPath();
+            }
             grid.restartPhermoneValues();
             stepSize=k;
             for(int i=0;i<noOfIterations;i++) {

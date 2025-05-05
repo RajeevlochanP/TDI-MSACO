@@ -46,6 +46,7 @@
     <div class="wrapper">
         <div id="myPlot10" style="width:100%;max-width:700px;"></div>
         <div id="myPlot11" style="width:100%;max-width:700px;"></div>
+        <div id="myPlot12" style="width:100%;max-width:700px;"></div>
     </div>
 </body>
 
@@ -273,6 +274,15 @@
     }
 
     visualize();
+    function minimum(array){
+        let min=array[0];
+        for(let i=0;i<array.length;i++){
+            if(min>array[i]){
+                min=array[i];
+            }
+        }
+        return min;
+    }
     function newGraphs(avgPaths, shortestPaths) {
         // Create a graph for each row (0-8)
         for (let row = 0; row < 9; row++) {
@@ -338,6 +348,23 @@
             margin:{t:40}
         }
         Plotly.newPlot(`myPlot11`,[trace],lay);
+
+        //global minimum
+        trace= {
+            x: [1,2,3,4,5,6,7,8,9],
+            y: [minimum(shortestPaths[0]),minimum(shortestPaths[1]),minimum(shortestPaths[2]),minimum(shortestPaths[3]),minimum(shortestPaths[4]),minimum(shortestPaths[5]),minimum(shortestPaths[6]),minimum(shortestPaths[7]),minimum(shortestPaths[8])],
+            mode:'lines',
+            name: 'Global optimal path length',
+            line: {color: 'blue'}
+        }
+        lay = {
+            title: 'step size vs Global optimal path length',
+            xaxis:{title: 'step size'},
+            yaxis:{title: 'Global optimal path length'},
+            showlegend:true,
+            margin:{t:20}
+        }
+        Plotly.newPlot(`myPlot12`,[trace],lay);
     }
 
 </script>
