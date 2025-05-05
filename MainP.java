@@ -5,8 +5,8 @@ class GraphP{
     double[][] phermoneValues;
     Position[][] index_data;
     int size;
-    int Q=100;
-    double evopRate=0.9;
+    int Q=30;
+    double evopRate=0.5;
     public GraphP(int size){
         generateGraphP(size);
         restartPhermoneValues();
@@ -246,8 +246,9 @@ public class MainP {
     double solutionCost=0;
     ArrayList<ArrayList<Position>> solutions;
     double[] solutionsCost;
+    double[][] averagePathLength=new double[9][100],shortestPathLength=new double[9][100];
     public MainP(boolean[][] graph){
-        int noOfAnts=10,noOfIterations=20,stepSize=3;
+        int noOfAnts=50,noOfIterations=100,stepSize=3;
         int alpha=1,beta=7;
         this.solutions=new ArrayList<>();
         this.solutionsCost=new double[noOfIterations];
@@ -313,6 +314,52 @@ public class MainP {
         this.solution.clear();
         this.solution.addAll(this.solutions.getLast());
         this.solutionCost=this.solutionsCost[noOfIterations-1];
+
+
+
+        //new graphs
+        for(int k=1;k<=9;k++){
+            grid.restartPhermoneValues();
+            stepSize=k;
+            for(int i=0;i<noOfIterations;i++) {
+                for(int j=0;j<noOfAnts;j++){
+                    ants[j].t=new Thread(ants[j]);
+                    ants[j].t.start();
+                    // System.out.print(ants[j].path.size()+" ");
+                }
+                for(int j=0;j<noOfAnts;j++){
+                    try{
+                    // System.out.print(j+"+");
+                    ants[j].t.join();
+                    }catch(InterruptedException e){
+                        System.err.println(e.getMessage());
+                    }
+                }
+                for(int row=0;row<grid.phermoneValues.length;row++) {
+                    for(int col=0;col<grid.phermoneValues.length;col++) {
+                        grid.phermoneValues[row][col]=grid.evopRate*(grid.phermoneValues[row][col]);
+                    }
+                }
+                for(int j=0;j<noOfAnts;j++){
+                    grid.updatePhermoneValues(ants[j].path);
+                }
+                System.out.print(i+", ");
+                // //trying to get solution from every iteration
+                this.shortestPathLength[k-1][i]=ants[0].pathCost;
+                this.averagePathLength[k-1][i]=ants[0].pathCost;
+                for(int j=1;j<noOfAnts;j++){
+                    if(this.shortestPathLength[k-1][i]>ants[j].pathCost){
+                        this.shortestPathLength[k-1][i]=ants[j].pathCost;
+                    }
+                    this.averagePathLength[k-1][i]+=ants[j].pathCost;
+                }
+                this.averagePathLength[k-1][i]/=noOfAnts;
+                // System.out.println("came");
+                for(int j=0;j<noOfAnts;j++){
+                    ants[j].restartPath();
+                }
+            }
+        }
     }
     /*public static void main(String[] args) {
         //initialisation

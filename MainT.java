@@ -92,9 +92,9 @@ class AntT implements Runnable{
     double pathCost;
     GraphT grid;
     int stepSize;
-    int alpha,beta;
+    double alpha,beta;
     Thread t;
-    public AntT(GraphT grid,int stepSize,int alpha,int beta){
+    public AntT(GraphT grid,int stepSize,double alpha,double beta){
         this.grid = grid;
         this.path=new ArrayList<Position>();
         this.pathCost=0;
@@ -226,8 +226,8 @@ public class MainT {
     ArrayList<ArrayList<Position>> solutions;
     double[] solutionsCost;
     public MainT(boolean[][] graph){
-        int noOfAnts=10,noOfIterations=20,stepSize=3;
-        int alpha=1,beta=7;
+        int noOfAnts=30,noOfIterations=50,stepSize=3;
+        double alpha=1.5,beta=0.8;
         this.solutions=new ArrayList<>();
         this.solutionsCost=new double[noOfIterations];
         this.grid=new GraphT(20);

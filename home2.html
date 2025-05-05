@@ -9,6 +9,12 @@
         body {
             font-family: sans-serif;
         }
+        .wrapper{
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+        }
     </style>
     <script src="https://cdn.plot.ly/plotly-3.0.1.min.js"></script>
 </head>
@@ -25,6 +31,22 @@
     <br>
     <canvas id="gridCanvas2" width="700" height="700"></canvas>
     <div id="myPlot" style="width:100%;max-width:700px;"></div>
+
+    <div class="wrapper">
+        <div id="myPlot1" style="width:100%;max-width:500px;"></div>
+        <div id="myPlot2" style="width:100%;max-width:500px;"></div>
+        <div id="myPlot3" style="width:100%;max-width:500px;"></div>
+        <div id="myPlot4" style="width:100%;max-width:500px;"></div>
+        <div id="myPlot5" style="width:100%;max-width:500px;"></div>
+        <div id="myPlot6" style="width:100%;max-width:500px;"></div>
+        <div id="myPlot7" style="width:100%;max-width:500px;"></div>
+        <div id="myPlot8" style="width:100%;max-width:500px;"></div>
+        <div id="myPlot9" style="width:100%;max-width:500px;"></div>
+    </div>
+    <div class="wrapper">
+        <div id="myPlot10" style="width:100%;max-width:700px;"></div>
+        <div id="myPlot11" style="width:100%;max-width:700px;"></div>
+    </div>
 </body>
 
 </html>
@@ -228,8 +250,8 @@
             type: 'lines',
             name: 'Research paper'
         }
-        const trace3= {
-            x: resObj.solutionsCost2.map((x,i)=>i),
+        const trace3 = {
+            x: resObj.solutionsCost2.map((x, i) => i),
             y: resObj.solutionsCost2,
             type: 'lines',
             name: 'MSACO'
@@ -239,12 +261,83 @@
             yaxis: { title: { text: "Best solution until Xth iteration" } },
             title: { text: "Comparison" }
         };
-        var data = [trace1, trace2,trace3];
+        var data = [trace1, trace2, trace3];
 
         Plotly.newPlot('myPlot', data, layout);
         document.body.insertAdjacentHTML("beforeend", `<h2> My EnhancedCost : ${resObj.solutionCost}</h2><h2> Research paper's Cost : ${resObj.solutionCost1}</h2><h2> MSACO cost : ${resObj.solutionCost2} </h2>`);
+
+
+        const avgPaths = resObj.averagePathLength2;
+        const shortestPaths = resObj.shortestPathLength2;
+        newGraphs(avgPaths, shortestPaths);
     }
 
     visualize();
+    function newGraphs(avgPaths, shortestPaths) {
+        // Create a graph for each row (0-8)
+        for (let row = 0; row < 9; row++) {
+            // Create x-axis values (column numbers 0-99)
+            const xValues = Array.from({ length: 100 }, (_, i) => i);
+
+            // Create traces
+            const trace1 = {
+                x: xValues,
+                y: avgPaths[row],
+                mode: 'lines',
+                name: 'Average Path Length',
+                line: { color: 'blue' }
+            };
+
+            const trace2 = {
+                x: xValues,
+                y: shortestPaths[row],
+                mode: 'lines',
+                name: 'Shortest Path Length',
+                line: { color: 'red' }
+            };
+
+            // Layout configuration
+            const layout = {
+                title: `Path Lengths Comparison (Row ${row})`,
+                xaxis: { title: 'Iteration Number' },
+                yaxis: { title: 'Path Length' },
+                showlegend: true,
+                margin: { t: 40 }
+            };
+
+            // Plot to the corresponding div
+            Plotly.newPlot(`myPlot${row + 1}`, [trace1, trace2], layout);
+        }
+        let trace= {
+            x: [1,2,3,4,5,6,7,8,9],
+            y: [avgPaths[0][0],avgPaths[1][0],avgPaths[2][0],avgPaths[3][0],avgPaths[4][0],avgPaths[5][0],avgPaths[6][0],avgPaths[7][0],avgPaths[8][0]],
+            mode:'lines',
+            name: 'Primary average path length',
+            line: {color: 'blue'}
+        }
+        let lay = {
+            title: 'step size vs primary average path cost',
+            xaxis:{title: 'step size'},
+            yaxis:{title: 'average path length'},
+            showlegend:true,
+            margin:{t:40}
+        }
+        Plotly.newPlot(`myPlot10`,[trace],lay);
+        trace= {
+            x: [1,2,3,4,5,6,7,8,9],
+            y: [shortestPaths[0][0],shortestPaths[1][0],shortestPaths[2][0],shortestPaths[3][0],shortestPaths[4][0],shortestPaths[5][0],shortestPaths[6][0],shortestPaths[7][0],shortestPaths[8][0]],
+            mode:'lines',
+            name: 'Initial optimal path length',
+            line: {color: 'blue'}
+        }
+        lay = {
+            title: 'step size vs Initial optimal path length',
+            xaxis:{title: 'step size'},
+            yaxis:{title: 'Initial optimal path length'},
+            showlegend:true,
+            margin:{t:40}
+        }
+        Plotly.newPlot(`myPlot11`,[trace],lay);
+    }
 
 </script>
